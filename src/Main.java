@@ -7,6 +7,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
+
 public class Main extends Application {
 
     @Override
@@ -59,18 +61,25 @@ public class Main extends Application {
         Agent agent1 = new Agent(nodeA, nodeC, new BFSearcher());
         Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher());
         Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher());
+        ArrayList<Agent> agents = new ArrayList<>();
+//        agents.add(agent1);
+        agents.add(agent2);
+        agents.add(agent3);
 
         // create auction
         Auction auction = new Auction(1, new AuctionStrategy());
 
         // run
         int iteration = 0;
-        boolean finish = false;
-        while(!finish){
+        while(!auction.finished){
             iteration++;
-            // PART1 - bidding
-            // PART2 - winner determination
-            // PART3 - price update
+            // STAGE 1 - bidding
+            for (Agent agent : agents) auction.addBid(agent.getNextBid());
+            // STAGE 2 - winner determination
+            auction.determineWinners();
+            // STAGE 3 - price update
+            auction.updatePrices();
+            break; //todo: for now just one iteration for testing
         }
     }
 }

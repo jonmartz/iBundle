@@ -8,7 +8,9 @@ import java.util.HashSet;
 public interface IAuctionStrategy {
 
     /**
-     * Determine the winners of the current bidding and set allocation for winner agents
+     * Determine the winners of the current bidding and set allocation for winner agents.
+     * @param bids to choose from
+     * @return true if auction is to be ended, false otherwise.
      */
-    void determineWinners(HashSet<Bid> bids);
+    boolean determineWinners(HashSet<Bid> bids);
 }
