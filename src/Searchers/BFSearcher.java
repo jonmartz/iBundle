@@ -18,7 +18,7 @@ public class BFSearcher implements ISearcher {
     public HashMap<Node, Integer> distances;
 
     @Override
-    public MDD findShortestPaths(Node start, Node goal, int lowerBoundary) {
+    public MDD findShortestPaths(Node start, Node goal) {
         //todo: use lowerBoundary
         visited = new HashSet<>();
         queue = new LinkedList<>();

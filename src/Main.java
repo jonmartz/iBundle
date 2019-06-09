@@ -23,15 +23,15 @@ public class Main extends Application {
 //        launch(args);
 
         // create nodes
-        Node nodeA = new Node();
-        Node nodeB = new Node();
-        Node nodeC = new Node();
-        Node nodeD = new Node();
-        Node nodeE = new Node();
-        Node nodeF = new Node();
-        Node nodeG = new Node();
-        Node nodeH = new Node();
-        Node nodeI = new Node();
+        Node nodeA = new Node(1);
+        Node nodeB = new Node(2);
+        Node nodeC = new Node(3);
+        Node nodeD = new Node(4);
+        Node nodeE = new Node(5);
+        Node nodeF = new Node(6);
+        Node nodeG = new Node(7);
+        Node nodeH = new Node(8);
+        Node nodeI = new Node(9);
 
         // connect nodes
         nodeA.addNeighbor(nodeB);
@@ -58,9 +58,9 @@ public class Main extends Application {
         graph.addNode(nodeI);
 
         // create agents
-        Agent agent1 = new Agent(nodeA, nodeC, new BFSearcher());
-        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher());
-        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher());
+        Agent agent1 = new Agent(nodeA, nodeC, new BFSearcher(), graph);
+        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
+        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
         ArrayList<Agent> agents = new ArrayList<>();
 //        agents.add(agent1);
         agents.add(agent2);

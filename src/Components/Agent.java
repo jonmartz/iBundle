@@ -2,6 +2,7 @@ package Components;
 
 import Searchers.ISearcher;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class Agent {
@@ -11,17 +12,20 @@ public class Agent {
     public HashSet<Bid> bids = new HashSet<>();
     public ISearcher searcher;
     public int lowerBoundary = 0;
+    public Graph graph;
 
-    public Agent(Node start, Node goal, ISearcher searcher) {
-        this.start = start;
-        this.goal = goal;
+    public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {
         this.searcher = searcher;
+        HashMap<Node, Node> originalNodeToCopyNodeMap = new HashMap<>();
+        this.graph = graph.getCopy(originalNodeToCopyNodeMap);
+        this.start = originalNodeToCopyNodeMap.get(start);
+        this.goal = originalNodeToCopyNodeMap.get(goal);
     }
 
     // todo: have to extend this to get also not shortest paths...
     public MDD findNextShortestPaths(){
-        MDD mdd = searcher.findShortestPaths(start, goal, lowerBoundary);
-        lowerBoundary = mdd.cost+1;
+        MDD mdd = searcher.findShortestPaths(start, goal);
+        graph.enlargeShortestPaths(mdd); // so next time we'll get only longer paths than this time
         return mdd;
     }
 

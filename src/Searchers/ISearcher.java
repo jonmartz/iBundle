@@ -9,5 +9,5 @@ public interface ISearcher {
      * @param goal node
      * @return MDD containing all shortest paths
      */
-    MDD findShortestPaths(Node start, Node goal, int lowerBoundary);
+    MDD findShortestPaths(Node start, Node goal);
 }
