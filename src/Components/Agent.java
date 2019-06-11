@@ -22,10 +22,10 @@ public class Agent {
         this.goal = originalNodeToCopyNodeMap.get(goal);
     }
 
-    // todo: have to extend this to get also not shortest paths...
     public MDD findNextShortestPaths(){
+        graph.reset();
         MDD mdd = searcher.findShortestPaths(start, goal);
-        graph.enlargeShortestPaths(mdd); // so next time we'll get only longer paths than this time
+        start = graph.enlargeShortestPaths(mdd); // todo: maybe dont run if allocation granted
         return mdd;
     }
 

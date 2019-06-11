@@ -1,5 +1,6 @@
 package Components;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -11,12 +12,42 @@ public class Graph {
     }
 
     /**
-     *  Modifies the graph as to simulate "waiting" one time step in any
-     *  one of the nodes in one of the shortest paths described in the MDD
+     * Modifies the graph as to simulate "waiting" one time step in any
+     * one of the nodes in one of the shortest paths described in the MDD
      * @param mdd containing paths to expand
+     * @return new start node (the new start must be the copy of start)
      */
-    public void enlargeShortestPaths(MDD mdd){
-        
+    public Node enlargeShortestPaths(MDD mdd){
+        Node newStart = null;
+        HashMap<Node, Node> originalNodeToCopyNodeMap = new HashMap<>();
+        // in first loop, clone every node in MDD (except for goal)
+        // and connect to twin and neighbors (if neighbor not in MDD)
+        for (Node node : mdd.nodes){
+            if (node == mdd.goal) continue;
+            Node nodeCopy = node.getCopy();
+            nodes.add(nodeCopy);
+            if (node == mdd.start) newStart = nodeCopy;
+            node.addNeighbor(nodeCopy);
+            originalNodeToCopyNodeMap.put(node, nodeCopy);
+            for (Node neighbor : node.neighbors){
+                if (neighbor != nodeCopy && !mdd.nodes.contains(neighbor)) {
+                    nodeCopy.addNeighbor(neighbor);
+                }
+            }
+        }
+        // in second loop, connect all copies to neighboring copies
+        for (Node node : mdd.nodes){
+            if (node == mdd.goal) continue;
+            for (Node neighbor : node.neighbors){
+                if (neighbor == mdd.goal) continue;
+                if (mdd.nodes.contains(neighbor)) {
+                    Node nodeCopy = originalNodeToCopyNodeMap.get(node);
+                    Node neighborCopy = originalNodeToCopyNodeMap.get(neighbor);
+                    nodeCopy.addNeighbor(neighborCopy);
+                }
+            }
+        }
+        return newStart;
     }
 
     public Graph getCopy(HashMap<Node, Node> originalNodeToCopyNodeMap) {
@@ -40,6 +71,14 @@ public class Graph {
             else { // make them neighbors!
                 nodeCopy.addNeighbor(originalNodeToCopyNodeMap.get(neighbor));
             }
+        }
+    }
+
+    public void reset() {
+        for (Node node : nodes){
+            node.visited = false;
+            node.previousNodes = new ArrayList<>();
+            node.distance = Integer.MAX_VALUE;
         }
     }
 }

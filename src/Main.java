@@ -23,15 +23,15 @@ public class Main extends Application {
 //        launch(args);
 
         // create nodes
-        Node nodeA = new Node(1);
-        Node nodeB = new Node(2);
-        Node nodeC = new Node(3);
-        Node nodeD = new Node(4);
-        Node nodeE = new Node(5);
-        Node nodeF = new Node(6);
-        Node nodeG = new Node(7);
-        Node nodeH = new Node(8);
-        Node nodeI = new Node(9);
+        Node nodeA = new Node(0);
+        Node nodeB = new Node(1);
+        Node nodeC = new Node(2);
+        Node nodeD = new Node(3);
+        Node nodeE = new Node(4);
+        Node nodeF = new Node(5);
+        Node nodeG = new Node(6);
+        Node nodeH = new Node(7);
+        Node nodeI = new Node(8);
 
         // connect nodes
         nodeA.addNeighbor(nodeB);
@@ -74,7 +74,9 @@ public class Main extends Application {
         while(!auction.finished){
             iteration++;
             // STAGE 1 - bidding
-            for (Agent agent : agents) auction.addBid(agent.getNextBid());
+            for (Agent agent : agents) {
+                if (agent.allocation == null) auction.addBid(agent.getNextBid());
+            }
             // STAGE 2 - winner determination
             auction.determineWinners();
             // STAGE 3 - price update

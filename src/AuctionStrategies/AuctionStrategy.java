@@ -8,7 +8,7 @@ public class AuctionStrategy implements IAuctionStrategy {
 
     @Override
     public boolean determineWinners(HashSet<Bid> bids) {
-        // todo
+        // todo: implement winner determination
         return false;
     }
 }
