@@ -1,11 +1,51 @@
 package Components;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Random;
 
 public class Graph {
-    public HashSet<Node> nodes = new HashSet<>();
+    public ArrayList<Node> nodes = new ArrayList<>();
+
+    public Graph() { }
+
+    public Graph(String mapPath) {
+        try {
+            File file = new File(mapPath);
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line = reader.readLine(); // ignore type
+
+            // get dimensions
+            line = reader.readLine();
+            int rows = Integer.parseInt(line.trim().split(" ")[1]);
+            line = reader.readLine();
+            int cols = Integer.parseInt(line.trim().split(" ")[1]);
+            GridNode[][] nodeGrid = new GridNode[rows][cols];
+            line = reader.readLine(); // ignore word "map"
+
+            // make node grid
+            int id = 0;
+            int row = 0;
+            while ((line = reader.readLine()) != null) {
+                for (int col = 0; col < line.length(); col++){
+                    if (line.charAt(col) == '.'){
+                        // new node
+                        GridNode node = new GridNode(id++, col, row);
+                        addNode(node);
+                        nodeGrid[row][col] = node;
+
+                        // connect node with upper and left nodes
+                        if (row > 0 && nodeGrid[row-1][col] != null) node.addNeighbor(nodeGrid[row-1][col]);
+                        if (col > 0 && nodeGrid[row][col-1] != null) node.addNeighbor(nodeGrid[row][col-1]);
+                    }
+                }
+                row++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void addNode(Node node){
         nodes.add(node);
@@ -80,5 +120,10 @@ public class Graph {
             node.previousNodes = new ArrayList<>();
             node.distance = Integer.MAX_VALUE;
         }
+    }
+
+    public Node getRandomNode() {
+        Random rand = new Random();
+        return nodes.get(rand.nextInt(nodes.size()));
     }
 }

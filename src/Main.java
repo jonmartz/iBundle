@@ -22,40 +22,49 @@ public class Main extends Application {
     public static void main(String[] args) {
 //        launch(args);
 
+        // create graph from map
+        Graph graph = new Graph("./Resources/den312d.map");
+        Node nodeA = graph.getRandomNode();
+        Node nodeB = graph.getRandomNode();
+        Node nodeC = graph.getRandomNode();
+        Node nodeE = graph.getRandomNode();
+        Node nodeF = graph.getRandomNode();
+        Node nodeI = graph.getRandomNode();
+
         // create nodes
-        Node nodeA = new Node(0);
-        Node nodeB = new Node(1);
-        Node nodeC = new Node(2);
-        Node nodeD = new Node(3);
-        Node nodeE = new Node(4);
-        Node nodeF = new Node(5);
-        Node nodeG = new Node(6);
-        Node nodeH = new Node(7);
-        Node nodeI = new Node(8);
-
-        // connect nodes
-        nodeA.addNeighbor(nodeB);
-        nodeA.addNeighbor(nodeC);
-        nodeB.addNeighbor(nodeD);
-        nodeC.addNeighbor(nodeD);
-        nodeC.addNeighbor(nodeE);
-        nodeD.addNeighbor(nodeF);
-        nodeD.addNeighbor(nodeG);
-        nodeE.addNeighbor(nodeG);
-        nodeE.addNeighbor(nodeI);
-        nodeF.addNeighbor(nodeH);
-
-        // add nodes to graph
-        Graph graph = new Graph();
-        graph.addNode(nodeA);
-        graph.addNode(nodeB);
-        graph.addNode(nodeC);
-        graph.addNode(nodeD);
-        graph.addNode(nodeE);
-        graph.addNode(nodeF);
-        graph.addNode(nodeG);
-        graph.addNode(nodeH);
-        graph.addNode(nodeI);
+//        Node nodeA = new Node(0);
+//        Node nodeB = new Node(1);
+//        Node nodeC = new Node(2);
+//        Node nodeD = new Node(3);
+//        Node nodeE = new Node(4);
+//        Node nodeF = new Node(5);
+//        Node nodeG = new Node(6);
+//        Node nodeH = new Node(7);
+//        Node nodeI = new Node(8);
+//
+//        // connect nodes
+//        nodeA.addNeighbor(nodeB);
+//        nodeA.addNeighbor(nodeC);
+//        nodeB.addNeighbor(nodeD);
+//        nodeC.addNeighbor(nodeD);
+//        nodeC.addNeighbor(nodeE);
+//        nodeD.addNeighbor(nodeF);
+//        nodeD.addNeighbor(nodeG);
+//        nodeE.addNeighbor(nodeG);
+//        nodeE.addNeighbor(nodeI);
+//        nodeF.addNeighbor(nodeH);
+//
+//        // add nodes to graph
+//        Graph graph = new Graph();
+//        graph.addNode(nodeA);
+//        graph.addNode(nodeB);
+//        graph.addNode(nodeC);
+//        graph.addNode(nodeD);
+//        graph.addNode(nodeE);
+//        graph.addNode(nodeF);
+//        graph.addNode(nodeG);
+//        graph.addNode(nodeH);
+//        graph.addNode(nodeI);
 
         // create agents
         Agent agent1 = new Agent(nodeA, nodeC, new BFSearcher(), graph);
