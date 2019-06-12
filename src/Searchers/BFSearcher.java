@@ -1,82 +1,30 @@
 package Searchers;
 
-
-import Components.MDD;
-import Components.MDDNode;
 import Components.Node;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 
-public class BFSearcher implements ISearcher {
+public class BFSearcher extends ASearcher{
 
-    public LinkedList<Node> openQueue;
+    private LinkedList<Node> openQueue;
 
     @Override
-    public MDD findShortestPaths(Node start, Node goal) {
-        start.distance = 0;
+    protected void initializeQueue() {
         openQueue = new LinkedList<>();
-        openQueue.add(start);
-        while(!openQueue.isEmpty()){
-            Node current = openQueue.pollFirst();
-            if (current == goal) return getSolution(start, goal);
-
-            // check if visited
-            if (current.visited) continue;
-            current.visited = true;
-
-            // add neighbors to queue
-            for (Node neighbor : current.neighbors){
-                if (!neighbor.visited){
-                    openQueue.add(neighbor);
-                    neighbor.previousNodes.add(current);
-                    neighbor.distance = current.distance+1;
-                }
-            }
-        }
-        return null;
     }
 
-    /**
-     * Build the MDD that contains all the shortest paths
-     * @return MDD
-     */
-    private MDD getSolution(Node start, Node goal) {
+    @Override
+    protected void enqueue(Node node) {
+        openQueue.add(node);
+    }
 
-        // make new MDD
-        MDD mdd = new MDD(goal.distance, start, goal);
-        int currentDistance = goal.distance;
-        HashSet<MDDNode> currentLayer = new HashSet<>(); // all nodes at distance n from start
-        HashSet<Node> nodesAddedToMDD = new HashSet<>();
-        MDDNode mddGoal = new MDDNode(goal, currentDistance);
-        currentLayer.add(mddGoal);
+    @Override
+    protected Node dequeue() {
+        return openQueue.pollFirst();
+    }
 
-        while (!currentLayer.isEmpty()){
-            HashSet<MDDNode> previousLayer = new HashSet<>();
-            HashMap<Node, MDDNode> previousLayerNodeToMDDNodeMap = new HashMap<>();
-            for (MDDNode current : currentLayer){
-                if (nodesAddedToMDD.contains(current.node)) continue;
-                nodesAddedToMDD.add(current.node);
-                mdd.add(current);
-
-                for (Node previousNode : current.node.previousNodes){
-                    if (previousLayerNodeToMDDNodeMap.containsKey(previousNode)){
-                        // get the already existing MDDNode that contains previousNode
-                        current.addNeighbor(previousLayerNodeToMDDNodeMap.get(previousNode));
-                    }
-                    else {
-                        MDDNode previousMddNode = new MDDNode(previousNode, currentDistance - 1);
-                        current.addNeighbor(previousMddNode);
-                        previousLayerNodeToMDDNodeMap.put(previousMddNode.node, previousMddNode);
-                        previousLayer.add(previousMddNode);
-                    }
-                }
-            }
-            currentLayer = previousLayer;
-            currentDistance--;
-        }
-        return mdd;
+    @Override
+    protected boolean isQueueEmpty() {
+        return openQueue.isEmpty();
     }
 }
