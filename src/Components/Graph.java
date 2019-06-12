@@ -14,10 +14,10 @@ public class Graph {
         try {
             File file = new File(mapPath);
             BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line = reader.readLine(); // ignore type
+            reader.readLine(); // ignore type
 
             // get dimensions
-            line = reader.readLine();
+            String line = reader.readLine();
             int rows = Integer.parseInt(line.trim().split(" ")[1]);
             line = reader.readLine();
             int cols = Integer.parseInt(line.trim().split(" ")[1]);

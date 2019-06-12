@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Main extends Application {
 
@@ -24,12 +25,26 @@ public class Main extends Application {
 
         // create graph from map
         Graph graph = new Graph("./Resources/den312d.map");
+        HashSet<Node> startAndGoalNodes = new HashSet<>();
+
+        // Get random start and goal states from graph
         Node nodeA = graph.getRandomNode();
+        startAndGoalNodes.add(nodeA);
         Node nodeB = graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeB)) nodeB = graph.getRandomNode();
+        startAndGoalNodes.add(nodeB);
         Node nodeC = graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeC)) nodeC = graph.getRandomNode();
+        startAndGoalNodes.add(nodeC);
         Node nodeE = graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeE)) nodeE = graph.getRandomNode();
+        startAndGoalNodes.add(nodeE);
         Node nodeF = graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeF)) nodeF = graph.getRandomNode();
+        startAndGoalNodes.add(nodeF);
         Node nodeI = graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeI)) nodeI = graph.getRandomNode();
+        startAndGoalNodes.add(nodeI);
 
         // create nodes
 //        Node nodeA = new Node(0);
