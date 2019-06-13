@@ -9,15 +9,15 @@ public class MDD {
     public ArrayList<MDDNode>[] mddNodes; // array of array lists. mddNodes[i] = all nodes in time i
     public Node start;
     public Node goal;
-    private int[] offsets; // to indicate the current path
-    private int currentTime = 0; // current time where path must try to modify path
+    private int[] offsets; // to indicate the current path (doesn't include t=cost)
+    private boolean gotFirstPath = false;
 
     public MDD(int cost, Node start, Node goal) {
         this.cost = cost;
         this.start = start;
         this.goal = goal;
         mddNodes = new ArrayList[cost+1];
-        offsets = new int[cost+1];
+        offsets = new int[cost];
     }
 
     public void add(MDDNode mddNode){
@@ -31,57 +31,57 @@ public class MDD {
     }
 
     public int[] getNextPath(){
-        findNextPath();
-        int[] nextPath = new int[cost];
-        int i = 0;
-        for (int offset : offsets){
-            nextPath[i] = mddNodes[i].get(offset).node.id;
-            i++;
+        if (!gotFirstPath){
+            gotFirstPath = true;
+            checkLegalPath(1);
         }
+        else findNextPath(offsets.length-1);
+        int[] nextPath = new int[cost+1];
+        for (int i = 0; i < cost; i++)
+            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
+        nextPath[cost] = goal.id;
         return nextPath;
     }
 
-    private void findNextPath(){
-        if (mddNodes[currentTime].size() > offsets[currentTime]+1){
-            // go to next node in current time
-            offsets[currentTime] += 1;
-            // at t=0 and t=cost there's only one node!
-            // so no worries about currentTime+1 here
-            resetOffsetsFromIndex(currentTime+1);
-            // or here
-            checkLegalPath(currentTime);
-        }
-        else{
-            // no more nodes in current time, reset offset here
-            // and move to next time
-            offsets[currentTime] = 0;
-            currentTime++;
-            if (currentTime > cost) {
-                // went through all possible paths: start over
-                currentTime = 0;
-                resetOffsetsFromIndex(0);
-                checkLegalPath(1);
+    private void checkLegalPath(int t) {
+        if (t == offsets.length) return; // on goal node
+        MDDNode curr = mddNodes[t].get(offsets[t]);
+        MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
+        if (!curr.neighbors.contains(prev)){
+            // move to next node in time t
+            if (mddNodes[t].size() == offsets[t]+1){
+                // can happen only one time step after the modified
+                // time step x in findNextPath: no more legal nodes,
+                // so go back and advance in x
+                findNextPath(t);
                 return;
             }
-            findNextPath();
+            offsets[t]+=1;
+            checkLegalPath(t);
+        }
+        else checkLegalPath(t+1);
+    }
+
+    private void findNextPath(int t){
+        resetOffsets(t+1);
+        if (t == 0){
+            // found all paths! reset everything
+            checkLegalPath(1);
+            return;
+        }
+        if (mddNodes[t].size() == offsets[t]+1){
+            // found all paths from t, so change offset at t-1
+            findNextPath(t-1);
+        }
+        else{
+            // move to next node in time t
+            offsets[t]+=1;
+            checkLegalPath(t);
         }
     }
 
-    private void checkLegalPath(int timeChecked) {
-        if (timeChecked > cost) return;
-        MDDNode currentMddNode = mddNodes[timeChecked].get(offsets[timeChecked]);
-        MDDNode previousMddNode = mddNodes[timeChecked-1].get(offsets[timeChecked-1]);
-        if (!currentMddNode.neighbors.contains(previousMddNode)){
-            // advance one node in current time
-            offsets[timeChecked]+=1;
-            checkLegalPath(timeChecked);
-        }
-        // check forward
-        else checkLegalPath(timeChecked+1);
-    }
-
-    private void resetOffsetsFromIndex(int fromIndex) {
-        for (int i = fromIndex; i < cost; i++){
+    private void resetOffsets(int t) {
+        for (int i = t; i < offsets.length; i++){
             offsets[i] = 0;
         }
     }

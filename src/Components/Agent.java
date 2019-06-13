@@ -13,6 +13,8 @@ public class Agent {
     public ISearcher searcher;
     public Graph graph;
 
+    int i = 0; // todo: delete
+
     public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {
         this.searcher = searcher;
         HashMap<Node, Node> originalNodeToCopyNodeMap = new HashMap<>();
@@ -22,8 +24,16 @@ public class Agent {
     }
 
     public MDD findNextShortestPaths(){
+        i++;
         graph.reset();
         MDD mdd = searcher.findShortestPaths(start, goal);
+        int[] nextPath;
+        while (i>1 && i<10) {
+            nextPath = mdd.getNextPath();
+            for (int j : nextPath) System.out.print(j+" ");
+            System.out.println();
+            i++;
+        }
         start = graph.enlargeShortestPaths(mdd); // todo: maybe dont run if allocation granted
         return mdd;
     }
