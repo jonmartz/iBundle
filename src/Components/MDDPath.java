@@ -16,7 +16,7 @@ public class MDDPath {
     }
 
     /**
-     * The constructor
+     * The constructor.
      */
     public MDDPath()
     {
