@@ -1,6 +1,5 @@
 package Components;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -9,43 +8,6 @@ public class Graph {
     public ArrayList<Node> nodes = new ArrayList<>();
 
     public Graph() { }
-
-    public Graph(String mapPath) {
-        try {
-            File file = new File(mapPath);
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            reader.readLine(); // ignore type
-
-            // get dimensions
-            String line = reader.readLine();
-            int rows = Integer.parseInt(line.trim().split(" ")[1]);
-            line = reader.readLine();
-            int cols = Integer.parseInt(line.trim().split(" ")[1]);
-            GridNode[][] nodeGrid = new GridNode[rows][cols];
-            line = reader.readLine(); // ignore word "map"
-
-            // make node grid
-            int id = 0;
-            int row = 0;
-            while ((line = reader.readLine()) != null) {
-                for (int col = 0; col < line.length(); col++){
-                    if (line.charAt(col) == '.'){
-                        // new node
-                        GridNode node = new GridNode(id++, col, row);
-                        addNode(node);
-                        nodeGrid[row][col] = node;
-
-                        // connect node with upper and left nodes
-                        if (row > 0 && nodeGrid[row-1][col] != null) node.addNeighbor(nodeGrid[row-1][col]);
-                        if (col > 0 && nodeGrid[row][col-1] != null) node.addNeighbor(nodeGrid[row][col-1]);
-                    }
-                }
-                row++;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void addNode(Node node){
         nodes.add(node);
@@ -64,7 +26,7 @@ public class Graph {
         // and connect to twin and neighbors (if neighbor not in MDD)
         for (Node node : mdd.nodes){
             if (node == mdd.goal) continue;
-            Node nodeCopy = node.getCopy();
+            Node nodeCopy = cloneNode(node);
             nodes.add(nodeCopy);
             if (node == mdd.start) newStart = nodeCopy;
             node.addNeighbor(nodeCopy);
@@ -90,13 +52,30 @@ public class Graph {
         return newStart;
     }
 
+    /**
+     * Different graphs may need to implement this differently when enlarging the graph
+     * @param node to copy
+     * @return copy
+     */
+    protected Node cloneNode(Node node) {
+        return node.getCopy();
+    }
+
     public Graph getCopy(HashMap<Node, Node> originalNodeToCopyNodeMap) {
-        Graph graphCopy = new Graph();
+        Graph graphCopy = getNewGraph();
         for (Node node : nodes){
             recursiveCopy(node, graphCopy, originalNodeToCopyNodeMap, null);
             break; // need only one
         }
         return graphCopy;
+    }
+
+    /**
+     * May need to be overiden in different graphs
+     * @return clone of graph
+     */
+    protected Graph getNewGraph() {
+        return new Graph();
     }
 
     private void recursiveCopy(Node node, Graph graphCopy, HashMap<Node, Node> originalNodeToCopyNodeMap, Node prevNodeCopy) {

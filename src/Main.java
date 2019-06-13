@@ -23,28 +23,33 @@ public class Main extends Application {
     public static void main(String[] args) {
 //        launch(args);
 
+        // simple test
+        GridGraph graph = new GridGraph("./Resources/test.map");
+        Agent agent1 = new Agent(graph.nodes.get(1), graph.nodes.get(3), new AStarSearcher(), graph);
+
+        // big test
         // create graph from map
-        Graph graph = new Graph("./Resources/den312d.map");
-        HashSet<Node> startAndGoalNodes = new HashSet<>();
+//        Graph graph = new Graph("./Resources/den312d.map");
+//        HashSet<Node> startAndGoalNodes = new HashSet<>();
 
         // Get random start and goal states from graph
-        Node nodeA = graph.getRandomNode();
-        startAndGoalNodes.add(nodeA);
-        Node nodeB = graph.getRandomNode();
-        while (startAndGoalNodes.contains(nodeB)) nodeB = graph.getRandomNode();
-        startAndGoalNodes.add(nodeB);
-        Node nodeC = graph.getRandomNode();
-        while (startAndGoalNodes.contains(nodeC)) nodeC = graph.getRandomNode();
-        startAndGoalNodes.add(nodeC);
-        Node nodeE = graph.getRandomNode();
-        while (startAndGoalNodes.contains(nodeE)) nodeE = graph.getRandomNode();
-        startAndGoalNodes.add(nodeE);
-        Node nodeF = graph.getRandomNode();
-        while (startAndGoalNodes.contains(nodeF)) nodeF = graph.getRandomNode();
-        startAndGoalNodes.add(nodeF);
-        Node nodeI = graph.getRandomNode();
-        while (startAndGoalNodes.contains(nodeI)) nodeI = graph.getRandomNode();
-        startAndGoalNodes.add(nodeI);
+//        GridNode nodeA = (GridNode)graph.getRandomNode();
+//        startAndGoalNodes.add(nodeA);
+//        GridNode nodeB = (GridNode)graph.getRandomNode();
+//        while (startAndGoalNodes.contains(nodeB)) nodeB = (GridNode)graph.getRandomNode();
+//        startAndGoalNodes.add(nodeB);
+//        GridNode nodeC = (GridNode)graph.getRandomNode();
+//        while (startAndGoalNodes.contains(nodeC)) nodeC = (GridNode)graph.getRandomNode();
+//        startAndGoalNodes.add(nodeC);
+//        GridNode nodeE = (GridNode)graph.getRandomNode();
+//        while (startAndGoalNodes.contains(nodeE)) nodeE = (GridNode)graph.getRandomNode();
+//        startAndGoalNodes.add(nodeE);
+//        GridNode nodeF = (GridNode)graph.getRandomNode();
+//        while (startAndGoalNodes.contains(nodeF)) nodeF = (GridNode)graph.getRandomNode();
+//        startAndGoalNodes.add(nodeF);
+//        GridNode nodeI = (GridNode)graph.getRandomNode();
+//        while (startAndGoalNodes.contains(nodeI)) nodeI = (GridNode)graph.getRandomNode();
+//        startAndGoalNodes.add(nodeI);
 
         // create nodes
 //        Node nodeA = new Node(0);
@@ -82,13 +87,14 @@ public class Main extends Application {
 //        graph.addNode(nodeI);
 
         // create agents
-        Agent agent1 = new Agent(nodeA, nodeC, new BFSearcher(), graph);
-        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
-        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
+//        Agent agent1 = new Agent(nodeA, nodeC, new AStarSearcher(), graph);
+//        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
+//        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
+
         ArrayList<Agent> agents = new ArrayList<>();
-//        agents.add(agent1);
-        agents.add(agent2);
-        agents.add(agent3);
+        agents.add(agent1);
+//        agents.add(agent2);
+//        agents.add(agent3);
 
         // create auction
         Auction auction = new Auction(1, new AuctionStrategy());
@@ -105,7 +111,6 @@ public class Main extends Application {
             auction.determineWinners();
             // STAGE 3 - price update
             auction.updatePrices();
-            break; //todo: for now just one iteration for testing
         }
     }
 }

@@ -11,7 +11,6 @@ public class Agent {
     public MDD allocation;
     public HashSet<Bid> bids = new HashSet<>();
     public ISearcher searcher;
-    public int lowerBoundary = 0;
     public Graph graph;
 
     public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {

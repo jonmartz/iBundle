@@ -30,9 +30,9 @@ public abstract class ASearcher implements ISearcher {
             // add neighbors to queue
             for (Node neighbor : current.neighbors){
                 if (!neighbor.visited){
-                    enqueue(neighbor);
                     neighbor.previousNodes.add(current);
                     neighbor.distance = current.distance+1;
+                    enqueue(neighbor);
                 }
             }
         }
