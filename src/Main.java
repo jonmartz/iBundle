@@ -9,23 +9,37 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
-public class Main extends Application {
+public class Main{// extends Application {
 
-    @Override
+    //@Override
     public void start(Stage primaryStage) throws Exception{
+        /*
         Parent root = FXMLLoader.load(getClass().getResource("GUI/view.fxml"));
         primaryStage.setTitle("iBundle");
         primaryStage.setScene(new Scene(root, 300, 275));
-        primaryStage.show();
+        primaryStage.show();*/
     }
 
     public static void main(String[] args) {
 //        launch(args);
+        List<Agent> list = new ArrayList<>();
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add(null);
+        list.add(null);
 
-        // simple test
+        IWinnerDeterminator iWinnerDeterminator = new WinnerDeterminator();
+        iWinnerDeterminator.getWinners(list);
+
+       /* // simple test
         GridGraph graph = new GridGraph("./Resources/test.map");
         Agent agent1 = new Agent(graph.nodes.get(1), graph.nodes.get(3), new AStarSearcher(), graph);
+
+
 
         // big test
         // create graph from map
@@ -111,6 +125,6 @@ public class Main extends Application {
             auction.determineWinners();
             // STAGE 3 - price update
             auction.updatePrices();
-        }
+        }*/
     }
 }

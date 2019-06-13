@@ -28,7 +28,7 @@ public class WinnerDeterminator implements IWinnerDeterminator {
         int numOfAgents = agents.size();
 
         String ans = "";
-        for (int i = numOfAgents; i >= 1; i++) {
+        for (int i = numOfAgents; i >= 1; i--) {
             ans = checkAgentsInFixedSize(agents,i,0,"");
             if(!ans.equals(""))
                 return getSetOfAgentsWithGivenString(agents,ans);
@@ -74,6 +74,7 @@ public class WinnerDeterminator implements IWinnerDeterminator {
      */
     private boolean assembleAndCheck(List<Agent> agents, String whichAgents)
     {
+        System.out.println(whichAgents);
         return checkIfAllCanWin(getSetOfAgentsWithGivenString(agents,whichAgents));
     }
 
@@ -85,6 +86,7 @@ public class WinnerDeterminator implements IWinnerDeterminator {
      */
     private Set<Agent> getSetOfAgentsWithGivenString(List<Agent> agents, String whichAgents)
     {
+
         String [] indexes = whichAgents.split(",");
         int [] indices = new int[indexes.length];
         for(int i=0;i<indexes.length;i++)
