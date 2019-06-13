@@ -105,7 +105,7 @@ public class WinnerDeterminator implements IWinnerDeterminator {
      */
     private  boolean checkIfAllCanWin(Set<Agent> agents)
     {
-        // TODO: 6/13/2019 This function will check if all the agents received are able to win 
+        // TODO: 6/13/2019 This function will check if all the agents received are able to win  
         return false;
     }
 
