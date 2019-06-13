@@ -16,4 +16,9 @@ public class MDDNode{
         neighbors.add(neighbor);
         neighbor.neighbors.add(this);
     }
+
+    @Override
+    public String toString() {
+        return node.id + " t=" + time;
+    }
 }

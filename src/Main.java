@@ -24,25 +24,24 @@ public class Main{// extends Application {
 
     public static void main(String[] args) {
 //        launch(args);
-        List<Agent> list = new ArrayList<>();
-        list.add(null);
-        list.add(null);
-        list.add(null);
-        list.add(null);
-        list.add(null);
-        list.add(null);
 
-        IWinnerDeterminator iWinnerDeterminator = new WinnerDeterminator();
-        iWinnerDeterminator.getWinners(list);
+//        List<Agent> list = new ArrayList<>();
+//        list.add(null);
+//        list.add(null);
+//        list.add(null);
+//        list.add(null);
+//        list.add(null);
+//        list.add(null);
+//
+//        IWinnerDeterminator iWinnerDeterminator = new WinnerDeterminator();
+//        iWinnerDeterminator.getWinners(list);
 
-       /* // simple test
-        GridGraph graph = new GridGraph("./Resources/test.map");
-        Agent agent1 = new Agent(graph.nodes.get(1), graph.nodes.get(3), new AStarSearcher(), graph);
+//        // simple test
+//        GridGraph graph = new GridGraph("./Resources/test.map");
+//        Agent agent1 = new Agent(graph.nodes.get(1), graph.nodes.get(3), new AStarSearcher(), graph);
 
-
-
-        // big test
-        // create graph from map
+//        // big test
+//        // create graph from map
 //        Graph graph = new Graph("./Resources/den312d.map");
 //        HashSet<Node> startAndGoalNodes = new HashSet<>();
 
@@ -66,49 +65,49 @@ public class Main{// extends Application {
 //        startAndGoalNodes.add(nodeI);
 
         // create nodes
-//        Node nodeA = new Node(0);
-//        Node nodeB = new Node(1);
-//        Node nodeC = new Node(2);
-//        Node nodeD = new Node(3);
-//        Node nodeE = new Node(4);
-//        Node nodeF = new Node(5);
-//        Node nodeG = new Node(6);
-//        Node nodeH = new Node(7);
-//        Node nodeI = new Node(8);
-//
-//        // connect nodes
-//        nodeA.addNeighbor(nodeB);
-//        nodeA.addNeighbor(nodeC);
-//        nodeB.addNeighbor(nodeD);
-//        nodeC.addNeighbor(nodeD);
-//        nodeC.addNeighbor(nodeE);
-//        nodeD.addNeighbor(nodeF);
-//        nodeD.addNeighbor(nodeG);
-//        nodeE.addNeighbor(nodeG);
-//        nodeE.addNeighbor(nodeI);
-//        nodeF.addNeighbor(nodeH);
-//
-//        // add nodes to graph
-//        Graph graph = new Graph();
-//        graph.addNode(nodeA);
-//        graph.addNode(nodeB);
-//        graph.addNode(nodeC);
-//        graph.addNode(nodeD);
-//        graph.addNode(nodeE);
-//        graph.addNode(nodeF);
-//        graph.addNode(nodeG);
-//        graph.addNode(nodeH);
-//        graph.addNode(nodeI);
+        Node nodeA = new Node(0);
+        Node nodeB = new Node(1);
+        Node nodeC = new Node(2);
+        Node nodeD = new Node(3);
+        Node nodeE = new Node(4);
+        Node nodeF = new Node(5);
+        Node nodeG = new Node(6);
+        Node nodeH = new Node(7);
+        Node nodeI = new Node(8);
+
+        // connect nodes
+        nodeA.addNeighbor(nodeB);
+        nodeA.addNeighbor(nodeC);
+        nodeB.addNeighbor(nodeD);
+        nodeC.addNeighbor(nodeD);
+        nodeC.addNeighbor(nodeE);
+        nodeD.addNeighbor(nodeF);
+        nodeD.addNeighbor(nodeG);
+        nodeE.addNeighbor(nodeG);
+        nodeE.addNeighbor(nodeI);
+        nodeF.addNeighbor(nodeH);
+
+        // add nodes to graph
+        Graph graph = new Graph();
+        graph.addNode(nodeA);
+        graph.addNode(nodeB);
+        graph.addNode(nodeC);
+        graph.addNode(nodeD);
+        graph.addNode(nodeE);
+        graph.addNode(nodeF);
+        graph.addNode(nodeG);
+        graph.addNode(nodeH);
+        graph.addNode(nodeI);
 
         // create agents
 //        Agent agent1 = new Agent(nodeA, nodeC, new AStarSearcher(), graph);
 //        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
-//        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
+        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
 
         ArrayList<Agent> agents = new ArrayList<>();
-        agents.add(agent1);
+//        agents.add(agent1);
 //        agents.add(agent2);
-//        agents.add(agent3);
+        agents.add(agent3);
 
         // create auction
         Auction auction = new Auction(1, new AuctionStrategy());
@@ -125,6 +124,6 @@ public class Main{// extends Application {
             auction.determineWinners();
             // STAGE 3 - price update
             auction.updatePrices();
-        }*/
+        }
     }
 }
