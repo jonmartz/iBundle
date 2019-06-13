@@ -4,6 +4,9 @@ import Components.*;
 
 import java.util.HashSet;
 
+/**
+ * This class will determine an auction strategy
+ */
 public class AuctionStrategy implements IAuctionStrategy {
 
     @Override

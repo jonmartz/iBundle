@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
 
+/**
+ * This interface contains the necessary functions for a class o implement inorder to
+ * Create an AuctionStrategy class
+ * */
 public interface IAuctionStrategy {
 
     /**
