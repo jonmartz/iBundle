@@ -1,6 +1,8 @@
 package Components;
 
+import Main.Main;
 import Searchers.ISearcher;
+import jdk.nashorn.internal.objects.Global;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,15 +31,12 @@ public class Agent {
     }
 
     public MDD findNextShortestPaths(){
-//        i++;
         graph.reset();
+//        if (Main.iteration == 5){
+//            int x = 5;
+//        }
         MDD mdd = searcher.findShortestPaths(start, goal);
         start = graph.enlargeShortestPaths(mdd); // todo: maybe don't run if allocation granted
-//        int[] path = new int[8];
-//        while (i > 1){
-//            path = mdd.getNextPath();
-//            i++;
-//        }
         return mdd;
     }
 
@@ -49,5 +48,10 @@ public class Agent {
         }
         currentBid = bestBid;
         return bestBid;
+    }
+
+    @Override
+    public String toString() {
+        return "id="+id;
     }
 }

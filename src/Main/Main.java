@@ -1,3 +1,5 @@
+package Main;
+
 import AuctionStrategies.*;
 import Components.*;
 import Searchers.*;
@@ -11,6 +13,8 @@ import jdk.nashorn.internal.ir.WhileNode;
 import java.util.*;
 
 public class Main{// extends Application {
+
+    public static int iteration;
 
     //@Override
     public void start(Stage primaryStage) throws Exception{
@@ -64,15 +68,15 @@ public class Main{// extends Application {
 //        startAndGoalNodes.add(nodeI);
 
         // create nodes
-        Node nodeA = new Node(0);
-        Node nodeB = new Node(1);
-        Node nodeC = new Node(2);
-        Node nodeD = new Node(3);
-        Node nodeE = new Node(4);
-        Node nodeF = new Node(5);
-        Node nodeG = new Node(6);
-        Node nodeH = new Node(7);
-        Node nodeI = new Node(8);
+        GridNode nodeA = new GridNode(0, 0,0);
+        GridNode nodeB = new GridNode(1, 0,0);
+        GridNode nodeC = new GridNode(2,0,0);
+        GridNode nodeD = new GridNode(3,0,0);
+        GridNode nodeE = new GridNode(4,0,0);
+        GridNode nodeF = new GridNode(5,0,0);
+        GridNode nodeG = new GridNode(6,0,0);
+        GridNode nodeH = new GridNode(7,0,0);
+        GridNode nodeI = new GridNode(8,0,0);
 
         // connect nodes
         nodeA.addNeighbor(nodeB);//0-1
@@ -118,7 +122,6 @@ public class Main{// extends Application {
         Auction auction = new Auction(1, new WinnerDeterminator());
         Set<Agent> remain = new HashSet<>(agents);
         // run
-        int iteration = 0;
         while(!auction.finished){
             iteration++;
             System.out.println("iteration " +iteration);

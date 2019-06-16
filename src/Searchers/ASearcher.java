@@ -29,7 +29,7 @@ public abstract class ASearcher implements ISearcher {
 
             // add neighbors to queue
             for (Node neighbor : current.neighbors){
-                if (!neighbor.visited){
+                if (!neighbor.visited && neighbor.distance > current.distance){
                     neighbor.previousNodes.add(current);
                     neighbor.distance = current.distance+1;
                     enqueue(neighbor);
@@ -46,8 +46,6 @@ public abstract class ASearcher implements ISearcher {
     protected abstract Node dequeue();
 
     protected abstract boolean isQueueEmpty();
-
-
 
     /**
      * Build the MDD that contains all the shortest paths

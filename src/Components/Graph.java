@@ -58,6 +58,11 @@ public class Graph {
      * @return copy
      */
     protected Node cloneNode(Node node) {
+        if (node instanceof GridNode){
+            GridNode clone = (GridNode) node.getCopy();
+            clone.z = clone.z+1;
+            return clone;
+        }
         return node.getCopy();
     }
 
