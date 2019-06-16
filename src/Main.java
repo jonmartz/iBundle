@@ -110,9 +110,9 @@ public class Main{// extends Application {
         agents.add(agent1);
         agents.add(agent2);
         agents.add(agent3);
-        //agents.add(agent4);
-        //agents.add(agent5);
-       // agents.add(agent6);
+        agents.add(agent4);
+        agents.add(agent5);
+        agents.add(agent6);
 
         // create auction
         Auction auction = new Auction(1, new WinnerDeterminator());
