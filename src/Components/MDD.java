@@ -10,7 +10,8 @@ public class MDD {
     public Node start;
     public Node goal;
     private int[] offsets; // to indicate the current path (doesn't include t=cost)
-    private boolean gotFirstPath = false;
+    private boolean firstPathEver = true;
+    public boolean gotFirstPath = false;
 
     public MDD(int cost, Node start, Node goal) {
         this.cost = cost;
@@ -31,7 +32,10 @@ public class MDD {
     }
 
     public int[] getNextPath(){
-        if (!gotFirstPath){
+        gotFirstPath = false;
+        if (firstPathEver){
+            // to handle getting a path for the first time
+            firstPathEver = false;
             gotFirstPath = true;
             checkLegalPath(1);
         }
@@ -66,6 +70,7 @@ public class MDD {
         resetOffsets(t+1);
         if (t == 0){
             // found all paths! reset everything
+            gotFirstPath = true;
             checkLegalPath(1);
             return;
         }

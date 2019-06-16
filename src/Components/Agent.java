@@ -12,8 +12,7 @@ public class Agent {
     public HashSet<Bid> bids = new HashSet<>();
     public ISearcher searcher;
     public Graph graph;
-
-    int i = 0; // todo: delete
+//    public int i = 0;
 
     public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {
         this.searcher = searcher;
@@ -24,17 +23,15 @@ public class Agent {
     }
 
     public MDD findNextShortestPaths(){
-        i++;
+//        i++;
         graph.reset();
         MDD mdd = searcher.findShortestPaths(start, goal);
-        int[] nextPath;
-        while (i>1 && i<10) {
-            nextPath = mdd.getNextPath();
-            for (int j : nextPath) System.out.print(j+" ");
-            System.out.println();
-            i++;
-        }
         start = graph.enlargeShortestPaths(mdd); // todo: maybe dont run if allocation granted
+//        int[] path = new int[8];
+//        while (i > 1){
+//            path = mdd.getNextPath();
+//            i++;
+//        }
         return mdd;
     }
 
