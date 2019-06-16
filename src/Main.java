@@ -100,7 +100,7 @@ public class Main{// extends Application {
 
         // create agents
         Agent agent1 = new Agent(nodeA, nodeG, new BFSearcher(), graph);
-       Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
+        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
         Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
         Agent agent4 = new Agent(nodeE, nodeD, new BFSearcher(), graph);
         Agent agent5 = new Agent(nodeH, nodeA, new BFSearcher(), graph);
@@ -110,9 +110,9 @@ public class Main{// extends Application {
         agents.add(agent1);
         agents.add(agent2);
         agents.add(agent3);
-        agents.add(agent4);
-        agents.add(agent5);
-        agents.add(agent6);
+        //agents.add(agent4);
+        //agents.add(agent5);
+        //agents.add(agent6);
 
         // create auction
         Auction auction = new Auction(1, new WinnerDeterminator());
