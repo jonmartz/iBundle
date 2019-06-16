@@ -11,6 +11,10 @@ public class MDD {
     public Node goal;
     private int[] offsets; // to indicate the current path (doesn't include t=cost)
     private boolean firstPathEver = true;
+    /**
+     * true if the path returned by getNextPath() is the first possible path.
+     * resets after all possible paths have been returned and the first path is again returned.
+     */
     public boolean gotFirstPath = false;
 
     public MDD(int cost, Node start, Node goal) {
