@@ -7,6 +7,8 @@ import java.io.IOException;
 
 public class GridGraph extends Graph {
 
+    public int[][] intGrid;
+
     private GridGraph(){}
 
     public GridGraph(String mapPath) {
@@ -21,6 +23,7 @@ public class GridGraph extends Graph {
             line = reader.readLine();
             int cols = Integer.parseInt(line.trim().split(" ")[1]);
             GridNode[][] nodeGrid = new GridNode[rows][cols];
+            intGrid = new int[rows][cols];
             line = reader.readLine(); // ignore word "map"
 
             // make node grid
@@ -28,7 +31,9 @@ public class GridGraph extends Graph {
             int row = 0;
             while ((line = reader.readLine()) != null) {
                 for (int col = 0; col < line.length(); col++){
+                    intGrid[row][col] = -1;
                     if (line.charAt(col) == '.'){
+                        intGrid[row][col] = id;
                         // new node
                         GridNode node = new GridNode(id++, col, row);
                         addNode(node);
