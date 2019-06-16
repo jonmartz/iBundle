@@ -65,6 +65,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             ans = checkAgentsInFixedSize(i,0,"");
             if(!ans.equals(""))
             {
+
                 return;
             }
 
@@ -161,10 +162,11 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
         int [] path;
         boolean flag = false;
-       // for(Bid bid: bidHistoryList)
-       // {
+        boolean compatible = false;
+     //   for(Bid bid: bidHistoryList)
+    //     {
             MDD mdd = currentAgent.currentBid.mdd;
-            //MDD mdd = bid.mdd;
+           // MDD mdd = bid.mdd;
             //System.out.println(mdd.mddNodes.length+" length");
             do {
 
@@ -173,18 +175,20 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 paths.add(index,path);
                 if(checkAllPaths(paths,false))
                 {
+                    compatible = true;
                     flag = flag || recursiveAssignmentCheck(index+1,paths);
                     if(flag)
                     {
                         return true;
                     }
                 }
+
                 paths.remove(index);
 
             } while (!mdd.gotFirstPath);
      //   }
 
-        return false;
+        return compatible && flag;
     }
 
     private boolean checkAllPaths(List<int []> paths,boolean toAllocate)
@@ -200,6 +204,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         int size = paths.size();
         Map<Integer,int []> check = new HashMap<>();
         Map<Integer,int []> checkPrev = new HashMap<>();
+        Set<Integer> fixed = new HashSet<>();
         int iter = 0;
         while(size>0)
         {
@@ -213,12 +218,16 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 if(iter >= curr.length)
                 {
                    // System.out.println("loop");
+                    fixed.add(curr[curr.length-1]);
                     iterator.remove();
 
                 }
                 else
                 {
-
+                    if(fixed.contains(curr[iter])) {
+                        //printNul2(pathsToConsider,paths);
+                        return false;
+                    }
                     if(iter>0)
                     {
                         if(checkPrev.containsKey(curr[iter]))
@@ -227,10 +236,13 @@ public class WinnerDeterminator implements IAuctionStrategy {
                             if(suspect != curr)
                             {
                                 if(suspect.length<=iter)//Dose not disappear
+                                {
+                                   // printNul2(pathsToConsider,paths);
                                     return false;
+                                }
                                 if(suspect[iter-1] == curr[iter] && suspect[iter] == curr[iter-1])//Cross
                                 {
-                                  //  System.out.println("alsdjlajda");
+                                    //printNul2(pathsToConsider,paths);
                                     return false;
                                 }
                             }
@@ -245,7 +257,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
                 if(iter == curr.length)
                 {
-                    // System.out.println("loop");
+                    fixed.add(curr[curr.length-1]);
                     iteratorConsider.remove();
                 }
                 else
@@ -257,7 +269,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             if(check.size()<new_list_paths.size()+new_paths_to_consider.size())
             {
                 //Collision
-               // System.out.println("Collision");
+                //printNul2(pathsToConsider,paths);
                 return false;
             }
 
@@ -293,7 +305,29 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
         System.out.println("path: "+pathInString);
     }
+    public void printNul(List<int []> paths)
+    {
 
+        for(int [] pathse:paths)
+        {
+            printAgentPath(pathse);
+        }
+
+    }
+    public void printNul2(List<int []> paths,List<int []> paths2)
+    {
+        System.out.println("++++++++++++++");
+        for(int [] pathse:paths)
+        {
+            printAgentPath(pathse);
+        }
+        for(int [] pathse:paths2)
+        {
+            printAgentPath(pathse);
+        }
+        System.out.println("++++++++++++++");
+
+    }
     private boolean test(List<int [] >li)
     {
         if(li.size()!=2)

@@ -61,11 +61,15 @@ public class Auction {
      * @param bid - The given bid
      */
     public void addBid(Bid bid){
-        Set<Bid> bidHistory = bids.get(bid.agent);
-        if(bidHistory == null)
+        Set<Bid> bidHistory;
+        if(!bids.containsKey(bid.agent))
         {
             bidHistory = new HashSet<>();
             this.bids.put(bid.agent,bidHistory);
+        }
+        else
+        {
+            bidHistory = bids.get(bid.agent);
         }
         bidHistory.add(bid);
     }
