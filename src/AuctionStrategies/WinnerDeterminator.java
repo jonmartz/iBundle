@@ -14,6 +14,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
     List<Agent> agents;//agents as a list
     List<Agent> allAgents;//all the given agents as a list
+    List<int []> pathsToConsider;//The allocated path
     HashMap<Agent,Set<Bid>> bids;//The given agents that participate in the bid with all of his bids
     /**
      * The constructor of the class
@@ -27,6 +28,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         //Set the parameter
         this.bids = bids;
         this.allAgents = new ArrayList<>(this.bids.keySet());
+        this.pathsToConsider = new ArrayList<>();
         Iterator<Agent> iterator = this.allAgents.iterator();
 
         while(iterator.hasNext())
@@ -34,6 +36,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             Agent a = iterator.next();
             if(a.allocation!=null)
             {
+                pathsToConsider.add(a.allocation);
                 iterator.remove();
             }
         }
@@ -158,9 +161,10 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
         int [] path;
         boolean flag = false;
-        for(Bid bid: bidHistoryList)
-        {
-            MDD mdd = bid.mdd;
+       // for(Bid bid: bidHistoryList)
+       // {
+            MDD mdd = currentAgent.currentBid.mdd;
+            //MDD mdd = bid.mdd;
             //System.out.println(mdd.mddNodes.length+" length");
             do {
 
@@ -178,7 +182,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 paths.remove(index);
 
             } while (!mdd.gotFirstPath);
-        }
+     //   }
 
         return false;
     }
@@ -191,16 +195,17 @@ public class WinnerDeterminator implements IAuctionStrategy {
             return true;
         }
         List<int []> new_list_paths = new ArrayList<>(paths);
+        List<int []> new_paths_to_consider = new ArrayList<>(this.pathsToConsider);
 
         int size = paths.size();
         Set<Integer> check = new HashSet<>();
         int iter = 0;
-        while(size>1)
+        while(size>0)
         {
 
 
             Iterator<int []> iterator = new_list_paths.iterator();
-
+            Iterator<int []> iteratorConsider = new_paths_to_consider.iterator();
             while(iterator.hasNext()) {
                 int [] curr = iterator.next();
 
@@ -214,8 +219,21 @@ public class WinnerDeterminator implements IAuctionStrategy {
                     check.add(curr[iter]);
                 }
             }
+            while(iteratorConsider.hasNext()) {
+                int [] curr = iteratorConsider.next();
 
-            if(check.size()<new_list_paths.size())
+                if(iter == curr.length)
+                {
+                    // System.out.println("loop");
+                    iterator.remove();
+                }
+                else
+                {
+                    check.add(curr[iter]);
+                }
+            }
+
+            if(check.size()<new_list_paths.size()+new_paths_to_consider.size())
             {
                 //Collision
                // System.out.println("Collision");
