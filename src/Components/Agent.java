@@ -8,10 +8,12 @@ import java.util.HashSet;
 public class Agent {
     public Node start;
     public Node goal;
-    public MDD allocation;
+    public int [] allocation;
     public HashSet<Bid> bids = new HashSet<>();
     public ISearcher searcher;
     public Graph graph;
+    public int id;
+    public static int counter=0;
 //    public int i = 0;
 
     public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {
@@ -20,6 +22,9 @@ public class Agent {
         this.graph = graph.getCopy(originalNodeToCopyNodeMap);
         this.start = originalNodeToCopyNodeMap.get(start);
         this.goal = originalNodeToCopyNodeMap.get(goal);
+        this.id = counter;
+        counter++;
+
     }
 
     public MDD findNextShortestPaths(){

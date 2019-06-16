@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 /**
  * This class will determine an auction strategy
- */
+
 public class AuctionStrategy implements IAuctionStrategy {
 
     @Override
@@ -15,3 +15,4 @@ public class AuctionStrategy implements IAuctionStrategy {
         return false;
     }
 }
+ */

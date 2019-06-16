@@ -6,10 +6,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import jdk.nashorn.internal.ir.WhileNode;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Main{// extends Application {
 
@@ -76,16 +75,16 @@ public class Main{// extends Application {
         Node nodeI = new Node(8);
 
         // connect nodes
-        nodeA.addNeighbor(nodeB);
-        nodeA.addNeighbor(nodeC);
-        nodeB.addNeighbor(nodeD);
-        nodeC.addNeighbor(nodeD);
-        nodeC.addNeighbor(nodeE);
-        nodeD.addNeighbor(nodeF);
-        nodeD.addNeighbor(nodeG);
-        nodeE.addNeighbor(nodeG);
-        nodeE.addNeighbor(nodeI);
-        nodeF.addNeighbor(nodeH);
+        nodeA.addNeighbor(nodeB);//0-1
+        nodeA.addNeighbor(nodeC);//0-2
+        nodeB.addNeighbor(nodeD);//1-3
+        nodeC.addNeighbor(nodeD);//2-3
+        nodeC.addNeighbor(nodeE);//2-4
+        nodeD.addNeighbor(nodeF);//3-5
+        nodeD.addNeighbor(nodeG);//3-6
+        nodeE.addNeighbor(nodeG);//4-6
+        nodeE.addNeighbor(nodeI);//4-8
+        nodeF.addNeighbor(nodeH);//5-7
 
         // add nodes to graph
         Graph graph = new Graph();
@@ -100,22 +99,25 @@ public class Main{// extends Application {
         graph.addNode(nodeI);
 
         // create agents
-//        Agent agent1 = new Agent(nodeA, nodeC, new AStarSearcher(), graph);
-//        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
+        Agent agent1 = new Agent(nodeA, nodeG, new BFSearcher(), graph);
+       Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
         Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
+        Agent agent4 = new Agent(nodeE, nodeD, new BFSearcher(), graph);
 
         ArrayList<Agent> agents = new ArrayList<>();
-//        agents.add(agent1);
-//        agents.add(agent2);
+        agents.add(agent1);
+        agents.add(agent2);
         agents.add(agent3);
+        agents.add(agent4);
 
         // create auction
-        Auction auction = new Auction(1, new AuctionStrategy());
-
+        Auction auction = new Auction(1, new WinnerDeterminator());
+        Set<Agent> remain = new HashSet<>(agents);
         // run
         int iteration = 0;
         while(!auction.finished){
             iteration++;
+            System.out.println("iteration " +iteration);
             // STAGE 1 - bidding
             for (Agent agent : agents) {
                 if (agent.allocation == null) auction.addBid(agent.getNextBid());
@@ -124,6 +126,43 @@ public class Main{// extends Application {
             auction.determineWinners();
             // STAGE 3 - price update
             auction.updatePrices();
+
+            System.out.println("The agent(s) that a path was assigned to them are:");
+            Iterator<Agent> iter = remain.iterator();
+            while(iter.hasNext())
+            {
+                Agent agent = iter.next();
+                if (agent.allocation != null)
+                {
+                    iter.remove();
+                    printAgentPath(agent);
+                }
+            }
+            System.out.println("*****************");
+
+
+
         }
+
+        System.out.println("The conclusion:");
+        for(int i=0;i<agents.size();i++)
+        {
+            printAgentPath(agents.get(i));
+        }
+        System.out.println("*****************");
+    }
+
+    public static void printAgentPath(Agent agent)
+    {
+        String pathInString = "";
+        int [] path = agent.allocation;
+
+        pathInString += agent.allocation[0];
+        for(int i=1;i<path.length;i++)
+        {
+            pathInString+= ","+agent.allocation[i];
+        }
+
+        System.out.println("Agent "+agent.id+" path: "+pathInString);
     }
 }
