@@ -13,7 +13,7 @@ public class Agent {
     public ISearcher searcher;
     public Graph graph;
     public int id;
-    public static int counter=0;
+    public static int counter=1;
     public Bid currentBid;
 //    public int i = 0;
 
