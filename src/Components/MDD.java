@@ -54,6 +54,14 @@ public class MDD {
     private void checkLegalPath(int t) {
         if (t == offsets.length) return; // on goal node
         MDDNode curr = mddNodes[t].get(offsets[t]);
+        try
+        {
+            MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
+        }
+        catch(Exception e)
+        {
+            System.out.println(t);
+        }
         MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
         if (!curr.neighbors.contains(prev)){
             // move to next node in time t
