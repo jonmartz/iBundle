@@ -26,7 +26,7 @@ public class Agent {
 //        i++;
         graph.reset();
         MDD mdd = searcher.findShortestPaths(start, goal);
-        start = graph.enlargeShortestPaths(mdd); // todo: maybe dont run if allocation granted
+        start = graph.enlargeShortestPaths(mdd); // todo: maybe don't run if allocation granted
 //        int[] path = new int[8];
 //        while (i > 1){
 //            path = mdd.getNextPath();
