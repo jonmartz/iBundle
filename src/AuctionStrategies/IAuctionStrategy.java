@@ -1,9 +1,7 @@
 package AuctionStrategies;
 import Components.*;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * This interface contains the necessary functions for a class o implement inorder to
@@ -16,5 +14,5 @@ public interface IAuctionStrategy {
      * @param bids to choose from
      * @return true if auction is to be ended, false otherwise.
      */
-    boolean determineWinners(HashSet<Bid> bids);
+    boolean determineWinners(HashMap<Agent,Set<Bid>> bids);
 }
