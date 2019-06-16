@@ -198,7 +198,8 @@ public class WinnerDeterminator implements IAuctionStrategy {
         List<int []> new_paths_to_consider = new ArrayList<>(this.pathsToConsider);
 
         int size = paths.size();
-        Set<Integer> check = new HashSet<>();
+        Map<Integer,int []> check = new HashMap<>();
+        Map<Integer,int []> checkPrev = new HashMap<>();
         int iter = 0;
         while(size>0)
         {
@@ -209,14 +210,34 @@ public class WinnerDeterminator implements IAuctionStrategy {
             while(iterator.hasNext()) {
                 int [] curr = iterator.next();
 
-                if(iter == curr.length)
+                if(iter >= curr.length)
                 {
                    // System.out.println("loop");
                     iterator.remove();
+
                 }
                 else
                 {
-                    check.add(curr[iter]);
+
+                    if(iter>0)
+                    {
+                        if(checkPrev.containsKey(curr[iter]))
+                        {
+                            int [] suspect = checkPrev.get(curr[iter]);
+                            if(suspect != curr)
+                            {
+                                if(suspect.length<=iter)//Dose not disappear
+                                    return false;
+                                if(suspect[iter-1] == curr[iter] && suspect[iter] == curr[iter-1])//Cross
+                                {
+                                  //  System.out.println("alsdjlajda");
+                                    return false;
+                                }
+                            }
+
+                        }
+                    }
+                    check.put(curr[iter],curr);
                 }
             }
             while(iteratorConsider.hasNext()) {
@@ -229,7 +250,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 }
                 else
                 {
-                    check.add(curr[iter]);
+                    check.put(curr[iter],curr);
                 }
             }
 
@@ -240,7 +261,8 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 return false;
             }
 
-            check.clear();
+            checkPrev = check;
+            check=new HashMap<>();
             iter++;
             size = new_list_paths.size();
         }
