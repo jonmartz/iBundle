@@ -103,7 +103,7 @@ public class Main{// extends Application {
        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
         Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
         Agent agent4 = new Agent(nodeE, nodeD, new BFSearcher(), graph);
-        Agent agent5 = new Agent(nodeH, nodeA, new BFSearcher(), graph);
+      //  Agent agent5 = new Agent(nodeH, nodeA, new BFSearcher(), graph);
         Agent agent6 = new Agent(nodeG, nodeC, new BFSearcher(), graph);
 
         ArrayList<Agent> agents = new ArrayList<>();
@@ -111,7 +111,7 @@ public class Main{// extends Application {
         agents.add(agent2);
         agents.add(agent3);
         agents.add(agent4);
-        agents.add(agent5);
+        //agents.add(agent5);
         agents.add(agent6);
 
         // create auction

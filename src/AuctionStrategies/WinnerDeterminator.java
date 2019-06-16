@@ -225,7 +225,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 if(iter == curr.length)
                 {
                     // System.out.println("loop");
-                    iterator.remove();
+                    iteratorConsider.remove();
                 }
                 else
                 {
