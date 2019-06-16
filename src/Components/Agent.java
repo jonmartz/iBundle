@@ -14,6 +14,7 @@ public class Agent {
     public Graph graph;
     public int id;
     public static int counter=0;
+    public Bid currentBid;
 //    public int i = 0;
 
     public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {
@@ -46,6 +47,7 @@ public class Agent {
         for (Bid bid : bids){
             if (bid.getValue()<=bestBid.getValue()) bestBid = bid;
         }
+        currentBid = bestBid;
         return bestBid;
     }
 }
