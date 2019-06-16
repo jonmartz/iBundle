@@ -27,7 +27,7 @@ public class GridNode extends Node{
      * @return manhattan distance
      */
     public int ManhattanDistance(GridNode node) {
-        return Math.max(Math.abs(node.x-x),Math.abs(node.y-y)) + z;
+        return Math.abs(node.x-x)+Math.abs(node.y-y) + z;
     }
 
     @Override
