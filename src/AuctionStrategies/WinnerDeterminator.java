@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class WinnerDeterminator implements IAuctionStrategy {
 
-
+    int test=0;
     List<Agent> agents;//agents as a list
     List<Agent> allAgents;//all the given agents as a list
     List<int []> pathsToConsider;//The allocated path
@@ -30,7 +30,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         this.allAgents = new ArrayList<>(this.bids.keySet());
         this.pathsToConsider = new ArrayList<>();
         Iterator<Agent> iterator = this.allAgents.iterator();
-
+        test++;
         while(iterator.hasNext())
         {
             Agent a = iterator.next();
@@ -142,6 +142,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
         List<Agent> agentsAsList = new ArrayList<>(agentsToCheck);
         agents = agentsAsList;
+
         return recursiveAssignmentCheck(0,new ArrayList<>());
     }
 
@@ -194,6 +195,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
     private boolean checkAllPaths(List<int []> paths,boolean toAllocate)
     {
 
+
         if(paths==null)
         {
             return true;
@@ -204,11 +206,18 @@ public class WinnerDeterminator implements IAuctionStrategy {
         int size = paths.size();
         Map<Integer,int []> check = new HashMap<>();
         Map<Integer,int []> checkPrev = new HashMap<>();
-        Set<Integer> fixed = new HashSet<>();
+        Map<Integer,int []> fixed = new HashMap<>();
+        int [] temp;
+        for(int i=0;i<pathsToConsider.size();i++)
+        {
+            temp = pathsToConsider.get(i);
+            fixed.put(temp[temp.length-1],temp);
+        }
         int iter = 0;
         while(size>0)
         {
 
+            //System.out.println("akksdha,d "+size+" "+test);
 
             Iterator<int []> iterator = new_list_paths.iterator();
             Iterator<int []> iteratorConsider = new_paths_to_consider.iterator();
@@ -218,17 +227,14 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 if(iter >= curr.length)
                 {
                     // System.out.println("loop");
-
+                    // System.out.println("a;lsd;aksd;s;aisdaoasid;");
                     iterator.remove();
 
                 }
                 else
                 {
 
-                    if(fixed.contains(curr[iter])) {
-                        //printNul2(pathsToConsider,paths);
-                        return false;
-                    }
+
                     if(iter>0)
                     {
                         if(checkPrev.containsKey(curr[iter]))
@@ -249,11 +255,28 @@ public class WinnerDeterminator implements IAuctionStrategy {
                             }
 
                         }
+                        if(fixed.containsKey(curr[iter]))
+                        {
+                            int [] suspect = fixed.get(curr[iter]);
+                            if(suspect.length-1<=iter)
+                            {
+                                return false;
+                            }
+                        }
                     }
                     if(iter==curr.length-1)
                     {
-                        fixed.add(curr[curr.length-1]);
+                        if(!fixed.containsKey(curr[curr.length-1]))
+                            fixed.put(curr[curr.length-1],curr);
+                        else {
+
+                            int [] suspect = fixed.get(curr[curr.length-1]);
+                            if(suspect.length<curr.length)
+                                return false;
+                            fixed.put(curr[curr.length-1],curr);
+                        }
                     }
+
                     check.put(curr[iter],curr);
                 }
             }
@@ -267,10 +290,6 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 }
                 else
                 {
-                    if(iter == curr.length-1)
-                    {
-                        fixed.add(curr[curr.length-1]);
-                    }
                     check.put(curr[iter],curr);
                 }
             }
@@ -281,7 +300,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 //printNul2(pathsToConsider,paths);
                 return false;
             }
-
+            //check the fixes
             checkPrev = check;
             check=new HashMap<>();
             iter++;
