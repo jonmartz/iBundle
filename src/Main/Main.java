@@ -177,7 +177,7 @@ public class Main extends Application {
         pathInString += agent.allocation[0];
         for(int i=1;i<path.length;i++)
         {
-            pathInString+= ","+agent.allocation[i];
+            pathInString += ","+agent.allocation[i];
         }
 
         System.out.println("Agent "+agent.id+" path: "+pathInString);
