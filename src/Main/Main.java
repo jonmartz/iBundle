@@ -47,7 +47,7 @@ public class Main extends Application {
 
         // big test
         // create graph from map
-        GridGraph graph = new GridGraph("./Resources/den312d.map");
+        GridGraph graph = new GridGraph("./Resources/test.map");
         HashSet<Node> startAndGoalNodes = new HashSet<>();
 
         // Get random start and goal states from graph
