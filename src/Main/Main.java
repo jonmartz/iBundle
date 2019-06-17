@@ -111,10 +111,10 @@ public class Main extends Application {
 //        graph.addNode(nodeI);
 
         // create agents
-        Agent agent1 = new Agent(nodeA, nodeG, new BFSearcher(), graph);
-        Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
-        Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
-        Agent agent4 = new Agent(nodeE, nodeD, new BFSearcher(), graph);
+        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(14), new BFSearcher(), graph);
+        Agent agent2 = new Agent(graph.nodes.get(9), graph.nodes.get(12), new BFSearcher(), graph);
+        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
+        Agent agent4 = new Agent(graph.nodes.get(21), graph.nodes.get(15), new BFSearcher(), graph);
 //        Agent agent5 = new Agent(nodeH, nodeA, new BFSearcher(), graph);
 //        Agent agent6 = new Agent(nodeG, nodeC, new BFSearcher(), graph);
 

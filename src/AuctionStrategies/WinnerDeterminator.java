@@ -163,28 +163,30 @@ public class WinnerDeterminator implements IAuctionStrategy {
         int [] path;
         boolean flag = false;
         boolean compatible = false;
-     //   for(Bid bid: bidHistoryList)
-    //     {
-            MDD mdd = currentAgent.currentBid.mdd;
-           // MDD mdd = bid.mdd;
-            //System.out.println(mdd.mddNodes.length+" length");
-            do {
-                path = mdd.getNextPath();
-                paths.add(index,path);
-                if(checkAllPaths(paths,false))
+        //   for(Bid bid: bidHistoryList)
+        //     {
+        MDD mdd = currentAgent.currentBid.mdd;
+        // MDD mdd = bid.mdd;
+        //System.out.println(mdd.mddNodes.length+" length");
+        do {
+
+
+            path = mdd.getNextPath();
+            paths.add(index,path);
+            if(checkAllPaths(paths,false))
+            {
+                compatible = true;
+                flag = flag || recursiveAssignmentCheck(index+1,paths);
+                if(flag)
                 {
-                    compatible = true;
-                    flag = flag || recursiveAssignmentCheck(index+1,paths);
-                    if(flag)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
+            }
 
-                paths.remove(index);
+            paths.remove(index);
 
-            } while (!mdd.gotFirstPath);
-     //   }
+        } while (!mdd.gotFirstPath);
+        //   }
 
         return compatible && flag;
     }
@@ -215,13 +217,14 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
                 if(iter >= curr.length)
                 {
-                   // System.out.println("loop");
-                    fixed.add(curr[curr.length-1]);
+                    // System.out.println("loop");
+
                     iterator.remove();
 
                 }
                 else
                 {
+
                     if(fixed.contains(curr[iter])) {
                         //printNul2(pathsToConsider,paths);
                         return false;
@@ -235,7 +238,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
                             {
                                 if(suspect.length<=iter)//Dose not disappear
                                 {
-                                   // printNul2(pathsToConsider,paths);
+                                    // printNul2(pathsToConsider,paths);
                                     return false;
                                 }
                                 if(suspect[iter-1] == curr[iter] && suspect[iter] == curr[iter-1])//Cross
@@ -247,6 +250,10 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
                         }
                     }
+                    if(iter==curr.length-1)
+                    {
+                        fixed.add(curr[curr.length-1]);
+                    }
                     check.put(curr[iter],curr);
                 }
             }
@@ -255,11 +262,15 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
                 if(iter == curr.length)
                 {
-                    fixed.add(curr[curr.length-1]);
+
                     iteratorConsider.remove();
                 }
                 else
                 {
+                    if(iter == curr.length-1)
+                    {
+                        fixed.add(curr[curr.length-1]);
+                    }
                     check.put(curr[iter],curr);
                 }
             }
@@ -276,7 +287,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             iter++;
             size = new_list_paths.size();
         }
-      //  System.out.println("exit");
+        //  System.out.println("exit");
         if(toAllocate)
         {
             size = paths.size();
