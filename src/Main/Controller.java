@@ -42,8 +42,10 @@ public class Controller{
     private int maxTime = 0;
 
     public void initialize(int[][] grid){
+        slider.setBlockIncrement(1);
         slider.valueProperty().addListener((ChangeListener) (arg0, arg1, arg2) -> {
-            time.setValue((int)(slider.getValue()/100*maxTime));
+//            time.setValue((int)(slider.getValue()/100*maxTime));
+            time.setValue((int)slider.getValue());
         });
         time.addListener((ChangeListener) (arg0, arg1, arg2) -> {
             draw();
@@ -90,7 +92,10 @@ public class Controller{
 
     public void addAgent(int[] path){
         paths.put(path, colors[agentCount++ % colors.length]);
-        if (path.length-1 > maxTime) maxTime = path.length-1;
+        if (path.length-1 > maxTime){
+            maxTime = path.length-1;
+            slider.setMax(maxTime);
+        }
     }
 
     private void addGrid(int[][] grid){
@@ -107,13 +112,17 @@ public class Controller{
 
     public void timeForward() {
         if (time.getValue() < maxTime){
-            time.setValue(time.getValue()+1);
+            updateSlider(1);
         }
     }
 
     public void timeBackward() {
         if (time.getValue() > 0){
-            time.setValue(time.getValue()-1);
+            updateSlider(-1);
         }
+    }
+
+    private void updateSlider(int delta){
+        slider.setValue(slider.getValue()+delta);
     }
 }

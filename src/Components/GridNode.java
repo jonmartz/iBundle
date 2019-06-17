@@ -32,6 +32,6 @@ public class GridNode extends Node{
 
     @Override
     public String toString() {
-        return id+" z="+z;
+        return id+" z="+z+" d="+distance;
     }
 }

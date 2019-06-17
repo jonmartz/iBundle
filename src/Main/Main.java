@@ -59,12 +59,18 @@ public class Main extends Application {
         GridNode nodeC = (GridNode)graph.getRandomNode();
         while (startAndGoalNodes.contains(nodeC)) nodeC = (GridNode)graph.getRandomNode();
         startAndGoalNodes.add(nodeC);
+        GridNode nodeD = (GridNode)graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeD)) nodeD = (GridNode)graph.getRandomNode();
+        startAndGoalNodes.add(nodeD);
         GridNode nodeE = (GridNode)graph.getRandomNode();
         while (startAndGoalNodes.contains(nodeE)) nodeE = (GridNode)graph.getRandomNode();
         startAndGoalNodes.add(nodeE);
         GridNode nodeF = (GridNode)graph.getRandomNode();
         while (startAndGoalNodes.contains(nodeF)) nodeF = (GridNode)graph.getRandomNode();
         startAndGoalNodes.add(nodeF);
+        GridNode nodeG = (GridNode)graph.getRandomNode();
+        while (startAndGoalNodes.contains(nodeG)) nodeG = (GridNode)graph.getRandomNode();
+        startAndGoalNodes.add(nodeG);
         GridNode nodeI = (GridNode)graph.getRandomNode();
         while (startAndGoalNodes.contains(nodeI)) nodeI = (GridNode)graph.getRandomNode();
         startAndGoalNodes.add(nodeI);
@@ -105,18 +111,18 @@ public class Main extends Application {
 //        graph.addNode(nodeI);
 
         // create agents
-//        Agent agent1 = new Agent(nodeA, nodeG, new BFSearcher(), graph);
+        Agent agent1 = new Agent(nodeA, nodeG, new BFSearcher(), graph);
         Agent agent2 = new Agent(nodeB, nodeE, new BFSearcher(), graph);
         Agent agent3 = new Agent(nodeF, nodeI, new BFSearcher(), graph);
-//        Agent agent4 = new Agent(nodeE, nodeD, new BFSearcher(), graph);
+        Agent agent4 = new Agent(nodeE, nodeD, new BFSearcher(), graph);
 //        Agent agent5 = new Agent(nodeH, nodeA, new BFSearcher(), graph);
 //        Agent agent6 = new Agent(nodeG, nodeC, new BFSearcher(), graph);
 
         ArrayList<Agent> agents = new ArrayList<>();
-//        agents.add(agent1);
+        agents.add(agent1);
         agents.add(agent2);
         agents.add(agent3);
-//        agents.add(agent4);
+        agents.add(agent4);
 //        agents.add(agent5);
 //        agents.add(agent6);
 
@@ -157,6 +163,7 @@ public class Main extends Application {
         }
         System.out.println("*****************");
 
+        // launch GUI
         controller.initialize(graph.intGrid);
         for (Agent agent : agents) controller.addAgent(agent.allocation);
         controller.draw();

@@ -169,8 +169,6 @@ public class WinnerDeterminator implements IAuctionStrategy {
            // MDD mdd = bid.mdd;
             //System.out.println(mdd.mddNodes.length+" length");
             do {
-
-
                 path = mdd.getNextPath();
                 paths.add(index,path);
                 if(checkAllPaths(paths,false))

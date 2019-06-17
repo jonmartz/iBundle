@@ -4,6 +4,7 @@ import Components.MDD;
 import Components.MDDNode;
 import Components.Node;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -30,6 +31,8 @@ public abstract class ASearcher implements ISearcher {
             // add neighbors to queue
             for (Node neighbor : current.neighbors){
                 if (!neighbor.visited && neighbor.distance > current.distance){
+                    if (neighbor.distance > current.distance+1) // for weird bug on A*
+                        neighbor.previousNodes = new ArrayList<>();
                     neighbor.previousNodes.add(current);
                     neighbor.distance = current.distance+1;
                     enqueue(neighbor);
@@ -70,6 +73,11 @@ public abstract class ASearcher implements ISearcher {
                 mdd.add(current);
 
                 for (Node previousNode : current.node.previousNodes){
+
+                    if (currentDistance == 0){
+                        int x = 5;
+                    }
+
                     if (previousLayerNodeToMDDNodeMap.containsKey(previousNode)){
                         // get the already existing MDDNode that contains previousNode
                         current.addNeighbor(previousLayerNodeToMDDNodeMap.get(previousNode));
