@@ -25,6 +25,18 @@ public class MDD {
         offsets = new int[cost];
     }
 
+    public boolean isNodeThere(int id)
+    {
+        for(int i=0;i<this.mddNodes.length;i++)
+        {
+            for(int j=0;j<this.mddNodes[i].size();j++)
+            {
+                if(this.mddNodes[i].get(j).node.id == id)
+                    return true;
+            }
+        }
+        return false;
+    }
     public void add(MDDNode mddNode){
         nodes.add(mddNode.node);
         ArrayList<MDDNode> mddNodesAtTimeT = mddNodes[mddNode.time];
