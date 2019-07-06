@@ -111,20 +111,20 @@ public class Main extends Application {
 //        graph.addNode(nodeI);
 
         // create agents
-        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(15), new BFSearcher(), graph);
-        Agent agent2 = new Agent(graph.nodes.get(10), graph.nodes.get(13), new BFSearcher(), graph);
+        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(14), new BFSearcher(), graph);
+        Agent agent2 = new Agent(graph.nodes.get(9), graph.nodes.get(12), new BFSearcher(), graph);
         Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
-        Agent agent4 = new Agent(graph.nodes.get(22), graph.nodes.get(16), new BFSearcher(), graph);
-        Agent agent5 = new Agent(graph.nodes.get(24), graph.nodes.get(5), new BFSearcher(), graph);
-        Agent agent6 = new Agent(graph.nodes.get(21), graph.nodes.get(7), new BFSearcher(), graph);
+        Agent agent4 = new Agent(graph.nodes.get(21), graph.nodes.get(15), new BFSearcher(), graph);
+//        Agent agent5 = new Agent(nodeH, nodeA, new BFSearcher(), graph);
+//        Agent agent6 = new Agent(nodeG, nodeC, new BFSearcher(), graph);
 
         ArrayList<Agent> agents = new ArrayList<>();
         agents.add(agent1);
         agents.add(agent2);
         agents.add(agent3);
         agents.add(agent4);
-        agents.add(agent5);
-        agents.add(agent6);
+//        agents.add(agent5);
+//        agents.add(agent6);
 
         // create auction
         Auction auction = new Auction(1, new WinnerDeterminator());
@@ -132,30 +132,28 @@ public class Main extends Application {
         // run
         while(!auction.finished){
             iteration++;
-
-
-
+            System.out.println("iteration " +iteration);
             // STAGE 1 - bidding
             for (Agent agent : agents) {
-                if (agent.allocation == null)
-                {
+                if (agent.allocation == null) auction.addBid(agent.getNextBid());
+            }
+            // STAGE 2 - winner determination
+            auction.determineWinners();
+            // STAGE 3 - price update
+            auction.updatePrices();
 
-                    auction.addBid(agent.getNextBid());
-                }
-               else {
+            System.out.println("The agent(s) that a path was assigned to them are:");
+            Iterator<Agent> iter = remain.iterator();
+            while(iter.hasNext())
+            {
+                Agent agent = iter.next();
+                if (agent.allocation != null)
+                {
+                    iter.remove();
                     printAgentPath(agent);
-                    agent.allocation = null;
                 }
             }
             System.out.println("*****************");
-            // STAGE 2 - winner determination
-            auction.determineWinners();
-
-            // STAGE 3 - price update
-            auction.updatePrices();
-            System.out.println("iteration " +iteration);
-            System.out.println("The agent(s) that a path was assigned to them are:");
-
         }
 
         System.out.println("The conclusion:");
@@ -169,7 +167,6 @@ public class Main extends Application {
         controller.initialize(graph.intGrid);
         for (Agent agent : agents) controller.addAgent(agent.allocation);
         controller.draw();
-
     }
 
     public static void printAgentPath(Agent agent)

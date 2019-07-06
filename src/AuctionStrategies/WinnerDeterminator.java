@@ -3,7 +3,6 @@ package AuctionStrategies;
 import Components.Agent;
 import Components.Bid;
 import Components.MDD;
-import javafx.util.Pair;
 
 import java.util.*;
 
@@ -12,12 +11,11 @@ import java.util.*;
  */
 public class WinnerDeterminator implements IAuctionStrategy {
 
-    int test = 0;
+    int test=0;
     List<Agent> agents;//agents as a list
     List<Agent> allAgents;//all the given agents as a list
-    //List<int []> pathsToConsider;//The allocated path
-    HashMap<Agent, Set<Bid>> bids;//The given agents that participate in the bid with all of his bids
-
+    List<int []> pathsToConsider;//The allocated path
+    HashMap<Agent,Set<Bid>> bids;//The given agents that participate in the bid with all of his bids
     /**
      * The constructor of the class
      */
@@ -30,13 +28,10 @@ public class WinnerDeterminator implements IAuctionStrategy {
         //Set the parameter
         this.bids = bids;
         this.allAgents = new ArrayList<>(this.bids.keySet());
-
-
-
-        //   this.pathsToConsider = new ArrayList<>();
-
+        this.pathsToConsider = new ArrayList<>();
+        Iterator<Agent> iterator = this.allAgents.iterator();
         test++;
-    /*    while(iterator.hasNext())
+        while(iterator.hasNext())
         {
             Agent a = iterator.next();
             if(a.allocation!=null)
@@ -44,19 +39,16 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 pathsToConsider.add(a.allocation);
                 iterator.remove();
             }
-        }*/
+        }
         //Decide on the winners in that iteration
         getWinners();
 
 
-        for (Agent agent : this.allAgents) {
-            if (agent.allocation == null) {
 
-               //System.out.println(agent.id +" id");
+        for(Agent agent : this.allAgents)
+        {
+            if(agent.allocation == null)
                 return false;
-
-            }
-
         }
         return true;
     }
@@ -66,110 +58,101 @@ public class WinnerDeterminator implements IAuctionStrategy {
      * This function will decide who the winners are
      */
     public void getWinners() {
-        int numOfAgents = bids.size();
+        int numOfAgents =bids.size();
 
         String ans = "";
-        List<Set<String>> allPosibillitiesAllSize = new ArrayList<>();
-        Set<String> allPossibilities = new HashSet<>();
         for (int i = numOfAgents; i >= 1; i--) {
-            checkAgentsInFixedSize(i, 0, "",allPossibilities);
+            ans = checkAgentsInFixedSize(i,0,"");
+            if(!ans.equals(""))
+            {
 
-            allPosibillitiesAllSize.add(allPossibilities);
-            allPossibilities = new HashSet<>();
-            //if (!ans.equals("")) {
-
-                //return;
-            //}
+                return;
+            }
 
         }
-        checkByOrder(allPosibillitiesAllSize);
     }
 
-
-    private String checkAgentsInFixedSize(int size, int index, String str,Set<String> allPossibilities) {
-        if (index == allAgents.size()||size ==0)
+    /**
+     * This function will check if there is a group of agents in the given size
+     * That can win the bid (all of the agents)
+     * @param size - Teh given agents's size
+     * @param index - The index of the agent in the list
+     * @param str - The string that will save the indices of the agents
+     * @return - The string of indices of the agents in the given list
+     * (If there is no group of agents that in the given size that can all win the bid, the function will return an empty string)
+     */
+    private String checkAgentsInFixedSize(int size,int index,String str)
+    {
+        if(index ==  allAgents.size())
             return "";
-        if (size == 1) {
-            allPossibilities.add(str+index);
-           // if (assembleAndCheck(str + index))
-
-            checkAgentsInFixedSize(size, index + 1, str,allPossibilities);
+        if(size == 1)
+        {
+            if(assembleAndCheck(str+index))
+                return str+index;
+            return checkAgentsInFixedSize(size,index+1,str);
         }
-        String ans = checkAgentsInFixedSize(size - 1, index + 1, str + index + ",",allPossibilities);
-        if (!ans.equals(""))
+        String ans = checkAgentsInFixedSize(size-1,index+1,str+index+",");
+        if(!ans.equals(""))
             return ans;
 
-        return checkAgentsInFixedSize(size, index + 1, str,allPossibilities);
+        return checkAgentsInFixedSize(size,index+1,str);
 
     }
-    private void checkByOrder(List<Set<String>> allPossibilities)
-    {
 
-        List<List<String>> allPossibilities2 = new ArrayList<>();
-        for(int i=0;i<allPossibilities.size();i++) {
-            List<String> temp = new ArrayList<>(allPossibilities.get(i));
-            temp.sort(new CompareString(this.allAgents));
-            allPossibilities2.add(temp);
-
-        }
-        for(int i=0;i<allPossibilities2.size();i++) {
-            for(int j=0;j<allPossibilities2.get(i).size();j++) {
-                if(assembleAndCheck(allPossibilities2.get(i).get(j)));
-                    return;
-            }
-        }
-
-    }
     /**
      * This function will get a list of agents and a string with their the bids's indices separated by ','
      * This function will check if the agents in the given indices can win the bid together
-     *
      * @param whichAgents - The indices of the agents
      * @return - True IFF all the agents can win in the bid
      */
-    private boolean assembleAndCheck(String whichAgents) {
+    private boolean assembleAndCheck(String whichAgents)
+    {
 
         return checkIfAllCanWin(getSetOfAgentsWithGivenString(whichAgents));
     }
 
     /**
      * This function will return the set of agents in the given indices (in string)
-     *
      * @param whichAgents - The indices of the agent that we want to return
      * @return - A set of agents
      */
-    private Set<Agent> getSetOfAgentsWithGivenString(String whichAgents) {
+    private Set<Agent> getSetOfAgentsWithGivenString(String whichAgents)
+    {
 
-        String[] indexes = whichAgents.split(",");
-        int[] indices = new int[indexes.length];
-        for (int i = 0; i < indexes.length; i++) {
+        String [] indexes = whichAgents.split(",");
+        int [] indices = new int[indexes.length];
+        for(int i=0;i<indexes.length;i++)
+        {
             indices[i] = Integer.parseInt(indexes[i]);
         }
 
         Set<Agent> setToCheck = new HashSet<>();
-        for (int i = 0; i < indices.length; i++) {
+        for(int i=0;i<indices.length;i++)
+        {
             setToCheck.add(allAgents.get(indices[i]));
         }
         return setToCheck;
     }
-
     /**
      * This function will receive a set of agents and
      * will return True IFF all the agents in the set can win the bid =
      */
-    private boolean checkIfAllCanWin(Set<Agent> agentsToCheck) {
+    private  boolean checkIfAllCanWin(Set<Agent> agentsToCheck)
+    {
 
         List<Agent> agentsAsList = new ArrayList<>(agentsToCheck);
         agents = agentsAsList;
 
-        return recursiveAssignmentCheck(0, new ArrayList<>());
+        return recursiveAssignmentCheck(0,new ArrayList<>());
     }
 
-    private boolean recursiveAssignmentCheck(int index, List<int[]> paths) {
+    private boolean recursiveAssignmentCheck( int index,List<int []> paths)
+    {
 
         //If we scanned all the agents
-        if (index == agents.size()) {
-            return checkAllPaths(paths, true);
+        if(index == agents.size())
+        {
+            return checkAllPaths(paths,true);
         }
 
         //Get the agent and its history
@@ -178,196 +161,37 @@ public class WinnerDeterminator implements IAuctionStrategy {
         List<Bid> bidHistoryList = new ArrayList<>(bidHistory);
         bidHistoryList.sort(new CompareBid());
 
-        int[] path;
+        int [] path;
         boolean flag = false;
         boolean compatible = false;
-        for(Bid bid: bidHistoryList)
-        {
-           // MDD mdd = currentAgent.currentBid.mdd;
-             MDD mdd = bid.mdd;
+        //   for(Bid bid: bidHistoryList)
+        //     {
+        MDD mdd = currentAgent.currentBid.mdd;
+        // MDD mdd = bid.mdd;
+        //System.out.println(mdd.mddNodes.length+" length");
+        do {
 
 
-            mdd.gotFirstPath = false;
-            while (!mdd.gotFirstPath){
-
-
-                path = mdd.getNextPath();
-
-
-                paths.add(index, path);
-                if (checkAllPaths(paths, false)) {
-                    compatible = true;
-                    flag = flag || recursiveAssignmentCheck(index + 1, paths);
-                    if (flag) {
-                        return true;
-                    }
+            path = mdd.getNextPath();
+            paths.add(index,path);
+            if(checkAllPaths(paths,false))
+            {
+                compatible = true;
+                flag = flag || recursiveAssignmentCheck(index+1,paths);
+                if(flag)
+                {
+                    return true;
                 }
-
-                paths.remove(index);
-
             }
 
-        }
+            paths.remove(index);
+
+        } while (!mdd.gotFirstPath);
+        //   }
 
         return compatible && flag;
     }
 
-    private boolean checkAllPaths(List<int[]> paths, boolean toAllocate)
-    {
-
-        HashMap <Integer, int [] > previousIteration = new HashMap<>();//The previous iteration
-        HashMap <Integer, int [] > currentIteration = new HashMap<>();//The current iteration
-        HashMap <Integer, Pair<Integer,int []>> fixed = new HashMap<>();//The final nodes. key - node, value - time & full path pair
-        int maxPath = -1;//The size pf the longest path
-        int length;
-        //Initial setup
-        for(int i=0;i<paths.size();i++)
-        {
-            int [] path = paths.get(i);
-            //Update the first iteration with the start position
-            previousIteration.put(path[0],path);
-            length = path.length;
-            //Finding the longest path's length
-            if(maxPath<length)
-            {
-                maxPath = length;
-            }
-
-            //Initializing the fixed map
-            fixed.put(path[length-1],new Pair<>(length -1 , path));
-        }
-
-        //If There are 2 agents with the same start/end node (shouldn't happen)
-        if(previousIteration.size()<paths.size() || fixed.size()<paths.size())
-        {
-            return false;
-        }
-
-        length = paths.size();//Amount of paths
-
-        int numOfSurvivers = 0;//The number of paths that we didn't finish going through
-        //Going through all of the nodes in the path
-        for(int iter=1; iter<maxPath;iter++)
-        {
-            numOfSurvivers = 0;
-
-            //For every path
-            for(int j=0;j<length;j++)
-            {
-
-                int [] current = paths.get(j);
-
-                //If we didn't go over all this path
-                if(current.length>iter)
-                {
-
-                    numOfSurvivers++;
-                    //Need to check 3 things:
-                    //1. don't collide
-                    //2. don't cross
-                    //3. watch out for agents that ended their path
-
-
-                    //2. don't cross
-                    if(previousIteration.containsKey(current[iter]))
-                    {
-                        //The suspicious path
-                        int [] suspect = previousIteration.get(current[iter]);
-
-                        if(suspect!=current)
-                        {
-                            //This means that last iteration was to the final node
-                            //The agent won't disappear so they will collide
-                            if(suspect.length<=iter)
-                            {
-                               // System.out.println("don't disappear1");
-                                return false;
-
-                            }
-                            //Cross
-                            if(current[iter-1] == suspect[iter]) {
-                             //   System.out.println("cross");
-                                return false;
-                            }
-                        }
-                    }
-
-                    //3. watch out for agents that ended their path
-                    if(fixed.containsKey(current[iter]))
-                    {
-                        Pair<Integer,int [] > timePathPair = fixed.get(current[iter]);
-                        //Collision with an agent that already reached it's destination
-
-                        if(timePathPair.getValue() != current && iter>=timePathPair.getKey()) {
-                          //  System.out.println("don't disappear2");
-                          //  System.out.println("iter "+iter+" time "+timePathPair.getKey()+" node num "+current[iter]);
-                            return false;
-                        }
-                    }
-                    currentIteration.put(current[iter],current);
-
-                }
-            }
-
-            //1. don't collide
-            if(numOfSurvivers>currentIteration.size())
-            {
-                //System.out.println("collide");
-                return false;
-            }
-            previousIteration = currentIteration;
-            currentIteration = new HashMap<>();
-        }
-
-        //Allocate the paths
-        if(toAllocate)
-        {
-            //printHashMap2(fixed);
-            length = paths.size();
-            for(int i=0;i<length;i++)
-            {
-                this.agents.get(i).allocation = paths.get(i);
-                //printAgentPath(this.agents.get(i));
-            }
-
-        }
-        return true;
-    }
-    private void printHashMap(HashMap<Integer, int [] > s)
-    {
-        String array = "";
-        for(int key : s.keySet())
-        {
-
-
-            int [] a = s.get(key);
-            for(int i=0;i<a.length;i++)
-            {
-                array += a[i]+",";
-            }
-            array = array.substring(0,array.length()-1);
-            System.out.println("key "+key+" value "+array);
-        }
-    }
-    private void printHashMap2(HashMap <Integer, Pair<Integer,int []>> s)
-    {
-        String array = "";
-        for(int key : s.keySet())
-        {
-
-
-            Pair<Integer,int []>p = s.get(key);
-            int [] a = p.getValue();
-            int time = p.getKey();
-            for(int i=0;i<a.length;i++)
-            {
-                array += a[i]+",";
-            }
-            array = array.substring(0,array.length()-1);
-            System.out.println("key "+key+" time "+time+" value "+array);
-        }
-    }
-    /*
     private boolean checkAllPaths(List<int []> paths,boolean toAllocate)
     {
 
@@ -377,31 +201,29 @@ public class WinnerDeterminator implements IAuctionStrategy {
             return true;
         }
         List<int []> new_list_paths = new ArrayList<>(paths);
-       // List<int []> new_paths_to_consider = new ArrayList<>(this.pathsToConsider);
+        List<int []> new_paths_to_consider = new ArrayList<>(this.pathsToConsider);
 
         int size = paths.size();
         Map<Integer,int []> check = new HashMap<>();
         Map<Integer,int []> checkPrev = new HashMap<>();
         Map<Integer,int []> fixed = new HashMap<>();
         int [] temp;
-      //  for(int i=0;i<pathsToConsider.size();i++)
+        for(int i=0;i<pathsToConsider.size();i++)
         {
-      //      temp = pathsToConsider.get(i);
-      //      fixed.put(temp[temp.length-1],temp);
+            temp = pathsToConsider.get(i);
+            fixed.put(temp[temp.length-1],temp);
         }
         int iter = 0;
-            //As long as agents remain
         while(size>0)
         {
 
             //System.out.println("akksdha,d "+size+" "+test);
 
             Iterator<int []> iterator = new_list_paths.iterator();
-            //Iterator<int []> iteratorConsider = new_paths_to_consider.iterator();
+            Iterator<int []> iteratorConsider = new_paths_to_consider.iterator();
             while(iterator.hasNext()) {
                 int [] curr = iterator.next();
 
-                //Done with this agent
                 if(iter >= curr.length)
                 {
                     // System.out.println("loop");
@@ -497,7 +319,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         }
         return true;
 
-    }*/
+    }
 
     public  void printAgentPath(int [] path)
     {
@@ -556,33 +378,6 @@ public class WinnerDeterminator implements IAuctionStrategy {
             return o2.mdd.mddNodes.length - o1.mdd.mddNodes.length;
         }
     }
-    public class CompareString implements Comparator<String>
-    {
-        List<Agent> agents;
-        public CompareString(List<Agent> given_agents)
-        {
-            this.agents = given_agents;
-        }
-        @Override
-        public int compare(String o1,String o2) {
-            int numOfBids1 = sumNumOfBids(o1);
-            int numOfBids2 = sumNumOfBids(o2);
-            return numOfBids1 - numOfBids2;
-        }
-        private int sumNumOfBids(String str)
-        {
-            String [] split = str.split((","));
-            int sum = 0;
-            int index;
-            for(int i=0;i<split.length;i++)
-            {
-                index = Integer.parseInt(split[i]);
-                sum+= this.agents.get(index).bids.size();
-            }
-            return sum;
-        }
-    }
-
     public void printAgentPath(Agent agent)
     {
         String pathInString = "";
