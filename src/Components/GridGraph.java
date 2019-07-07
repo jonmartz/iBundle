@@ -8,6 +8,7 @@ import java.io.IOException;
 public class GridGraph extends Graph {
 
     public int[][] intGrid;
+    public GridNode[][] nodeGrid;
 
     private GridGraph(){}
 
@@ -22,7 +23,7 @@ public class GridGraph extends Graph {
             int rows = Integer.parseInt(line.trim().split(" ")[1]);
             line = reader.readLine();
             int cols = Integer.parseInt(line.trim().split(" ")[1]);
-            GridNode[][] nodeGrid = new GridNode[rows][cols];
+            nodeGrid = new GridNode[rows][cols];
             intGrid = new int[rows][cols];
             line = reader.readLine(); // ignore word "map"
 

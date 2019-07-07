@@ -70,21 +70,18 @@ public abstract class ASearcher implements ISearcher {
             for (MDDNode current : currentLayer){
                 if (nodesAddedToMDD.contains(current.node)) continue;
                 nodesAddedToMDD.add(current.node);
-                mdd.add(current);
+
+                // to not enter twice a node with same id to time t
+                MDDNode originalMddNode = mdd.add(current);
 
                 for (Node previousNode : current.node.previousNodes){
-
-                    if (currentDistance == 0){
-                        int x = 5;
-                    }
-
                     if (previousLayerNodeToMDDNodeMap.containsKey(previousNode)){
                         // get the already existing MDDNode that contains previousNode
-                        current.addNeighbor(previousLayerNodeToMDDNodeMap.get(previousNode));
+                        originalMddNode.addNeighbor(previousLayerNodeToMDDNodeMap.get(previousNode));
                     }
                     else {
                         MDDNode previousMddNode = new MDDNode(previousNode, currentDistance - 1);
-                        current.addNeighbor(previousMddNode);
+                        originalMddNode.addNeighbor(previousMddNode);
                         previousLayerNodeToMDDNodeMap.put(previousMddNode.node, previousMddNode);
                         previousLayer.add(previousMddNode);
                     }

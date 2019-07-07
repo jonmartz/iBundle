@@ -1,5 +1,6 @@
 package Components;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -37,14 +38,33 @@ public class MDD {
         }
         return false;
     }
-    public void add(MDDNode mddNode){
+
+    /**
+     * Adds an MDDNode to the correct time t.
+     * @param mddNode to add
+     * @return If there's already a node with that id in time t, returns that MDDNode.
+     *         Else, returns the argument MDDNode.
+     */
+    public MDDNode add(MDDNode mddNode){
         nodes.add(mddNode.node);
         ArrayList<MDDNode> mddNodesAtTimeT = mddNodes[mddNode.time];
-        if (mddNodesAtTimeT == null){
+        if (mddNodesAtTimeT == null){ // if first node to add to time t
             mddNodesAtTimeT = new ArrayList<>();
             mddNodes[mddNode.time] = mddNodesAtTimeT;
+            mddNodesAtTimeT.add(mddNode);
         }
-        mddNodesAtTimeT.add(mddNode);
+        else{ // look if node with id is already in time t
+            boolean found = false;
+            for (MDDNode current : mddNodesAtTimeT){
+                if (current.node.id == mddNode.node.id){
+                    mddNode = current;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) mddNodesAtTimeT.add(mddNode);
+        }
+        return mddNode;
     }
 
     public int[] getNextPath(){
@@ -60,15 +80,18 @@ public class MDD {
         for (int i = 0; i < cost; i++)
             nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
         nextPath[cost] = goal.id;
+
+//        ArrayList<String> stringPath = new ArrayList<>();
+//        for (Integer i : nextPath) stringPath.add(i.toString());
+//        System.out.println(String.join(" ",stringPath));
+//        if (gotFirstPath) System.out.println("gotFirstPath");
+
         return nextPath;
     }
 
     private void checkLegalPath(int t) {
         if (t == offsets.length) return; // on goal node
         MDDNode curr = mddNodes[t].get(offsets[t]);
-        if (mddNodes[0] == null){
-            int x = 5;
-        }
         MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
         if (!curr.neighbors.contains(prev)){
             // move to next node in time t

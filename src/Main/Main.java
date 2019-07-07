@@ -33,7 +33,7 @@ public class Main extends Application {
         ArrayList<Agent> agents = new ArrayList<>();
 
         // 1) random start and goals
-        int numAgents = 10;
+        int numAgents = 1;
         HashSet<GridNode> startAndGoalNodes = new HashSet<>();
         GridNode node;
         for (int i = 0; i < numAgents*2; i++){
@@ -51,12 +51,20 @@ public class Main extends Application {
         }
 
 //        // 2) manual start and goal nodes
+//        // test.map
 //        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(15), new BFSearcher(), graph);
 //        Agent agent2 = new Agent(graph.nodes.get(10), graph.nodes.get(13), new BFSearcher(), graph);
 //        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
 //        Agent agent4 = new Agent(graph.nodes.get(22), graph.nodes.get(16), new BFSearcher(), graph);
 //        Agent agent5 = new Agent(graph.nodes.get(24), graph.nodes.get(5), new BFSearcher(), graph);
 //        Agent agent6 = new Agent(graph.nodes.get(21), graph.nodes.get(7), new BFSearcher(), graph);
+//        // test2.map
+////        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(14), new BFSearcher(), graph);
+////        Agent agent2 = new Agent(graph.nodes.get(9), graph.nodes.get(12), new BFSearcher(), graph);
+////        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
+////        Agent agent4 = new Agent(graph.nodes.get(21), graph.nodes.get(15), new BFSearcher(), graph);
+////        Agent agent5 = new Agent(graph.nodes.get(23), graph.nodes.get(5), new BFSearcher(), graph);
+////        Agent agent6 = new Agent(graph.nodes.get(20), graph.nodes.get(7), new BFSearcher(), graph);
 //        agents.add(agent1);
 //        agents.add(agent2);
 //        agents.add(agent3);
@@ -70,6 +78,10 @@ public class Main extends Application {
         // run
         while(!auction.finished){
             iteration++;
+
+            if (iteration == 4){
+                int x=5;
+            }
 
             // STAGE 1 - bidding
             for (Agent agent : agents) {
