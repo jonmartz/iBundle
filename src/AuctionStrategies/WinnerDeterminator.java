@@ -553,7 +553,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         public int compare(Bid o1, Bid o2) {
             if(o1.mdd.mddNodes.length == o2.mdd.mddNodes.length)
                 return 0;
-            return o2.mdd.mddNodes.length - o1.mdd.mddNodes.length;
+            return o1.mdd.mddNodes.length - o2.mdd.mddNodes.length;
         }
     }
     public class CompareString implements Comparator<String>
