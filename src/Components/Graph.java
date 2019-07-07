@@ -1,8 +1,6 @@
 package Components;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 public class Graph {
     public ArrayList<Node> nodes = new ArrayList<>();
@@ -25,7 +23,7 @@ public class Graph {
         // in first loop, clone every node in MDD (except for goal)
         // and connect to twin and neighbors (if neighbor not in MDD)
         for (Node node : mdd.nodes){
-            if (node == mdd.goal) continue;
+//            if (node == mdd.goal) continue;
             Node nodeCopy = cloneNode(node);
             nodes.add(nodeCopy);
             if (node == mdd.start) newStart = nodeCopy;
@@ -39,9 +37,9 @@ public class Graph {
         }
         // in second loop, connect all copies to neighboring copies
         for (Node node : mdd.nodes){
-            if (node == mdd.goal) continue;
+//            if (node == mdd.goal) continue;
             for (Node neighbor : node.neighbors){
-                if (neighbor == mdd.goal) continue;
+//                if (neighbor == mdd.goal) continue;
                 if (mdd.nodes.contains(neighbor)) {
                     Node nodeCopy = originalNodeToCopyNodeMap.get(node);
                     Node neighborCopy = originalNodeToCopyNodeMap.get(neighbor);
@@ -66,12 +64,18 @@ public class Graph {
         return node.getCopy();
     }
 
+    /**
+     * Get a deep copy of the graph
+     * @param originalNodeToCopyNodeMap map of node copies, gotten from outside so that caller can
+     *                                  retrieve start and goal nodes from it
+     * @return a copy of the graph
+     */
     public Graph getCopy(HashMap<Node, Node> originalNodeToCopyNodeMap) {
         Graph graphCopy = getNewGraph();
-        for (Node node : nodes){
-            recursiveCopy(node, graphCopy, originalNodeToCopyNodeMap, null);
-            break; // need only one
-        }
+        LinkedList<Node[]> nodeQueue = new LinkedList<>();
+        Node[] firstEntry = {nodes.get(0), null};
+        nodeQueue.add(firstEntry);
+        while(iterativeCopy(nodeQueue, graphCopy, originalNodeToCopyNodeMap));
         return graphCopy;
     }
 
@@ -83,19 +87,41 @@ public class Graph {
         return new Graph();
     }
 
-    private void recursiveCopy(Node node, Graph graphCopy, HashMap<Node, Node> originalNodeToCopyNodeMap, Node prevNodeCopy) {
-        Node nodeCopy = node.getCopy();
+    /**
+     * Copy the graph. If copy has been completed, returns false. Is iterative in order to avoid a stack overflow.
+     * @param nodeQueue to retrieve node to copy and the prev node copied
+     * @param graphCopy graph to copy
+     * @param originalNodeToCopyNodeMap explained before
+     * @return true to continue, false to end copy
+     */
+    private boolean iterativeCopy(LinkedList<Node[]> nodeQueue, Graph graphCopy, HashMap<Node, Node> originalNodeToCopyNodeMap) {
+        if (nodeQueue.isEmpty()) return false;
+
+        // get nodes from queue
+        Node[] nodesEntry = nodeQueue.removeFirst();
+        Node node = nodesEntry[0];
+        Node prevNode = nodesEntry[1];
+        Node nodeCopy = node.getCopy(); // will not be null
+        Node prevNodeCopy = null;
+        if (prevNode != null) prevNodeCopy = nodesEntry[1].getCopy();
+
+        // connect nodes
         graphCopy.addNode(nodeCopy);
         if (prevNodeCopy != null) nodeCopy.addNeighbor(prevNodeCopy);
-        originalNodeToCopyNodeMap.put(node, nodeCopy); // to not add a neighbor twice, and be able to have more than one node with same id
+
+        // to not add a neighbor twice,and be able to have more than one node with same id
+        originalNodeToCopyNodeMap.put(node, nodeCopy);
+
         for (Node neighbor : node.neighbors){
             if (!originalNodeToCopyNodeMap.containsKey(neighbor)){
-                recursiveCopy(neighbor, graphCopy, originalNodeToCopyNodeMap, nodeCopy);
+                Node[] newEntry = {neighbor, nodeCopy};
+                nodeQueue.add(newEntry);
             }
-            else { // make them neighbors!
+            else { // make them neighbors anyway!
                 nodeCopy.addNeighbor(originalNodeToCopyNodeMap.get(neighbor));
             }
         }
+        return true;
     }
 
     public void reset() {
