@@ -75,7 +75,9 @@ public class Graph {
         LinkedList<Node[]> nodeQueue = new LinkedList<>();
         Node[] firstEntry = {nodes.get(0), null};
         nodeQueue.add(firstEntry);
-        while(iterativeCopy(nodeQueue, graphCopy, originalNodeToCopyNodeMap));
+        HashSet<Node> nodesAddedToQueue = new HashSet<>();
+        nodesAddedToQueue.add(nodes.get(0));
+        while(iterativeCopy(nodeQueue, graphCopy, originalNodeToCopyNodeMap, nodesAddedToQueue));
         return graphCopy;
     }
 
@@ -94,7 +96,10 @@ public class Graph {
      * @param originalNodeToCopyNodeMap explained before
      * @return true to continue, false to end copy
      */
-    private boolean iterativeCopy(LinkedList<Node[]> nodeQueue, Graph graphCopy, HashMap<Node, Node> originalNodeToCopyNodeMap) {
+    private boolean iterativeCopy(LinkedList<Node[]> nodeQueue, Graph graphCopy,
+                                  HashMap<Node, Node> originalNodeToCopyNodeMap,
+                                  HashSet<Node> nodesAddedToQueue) {
+
         if (nodeQueue.isEmpty()) return false;
 
         // get nodes from queue
@@ -104,6 +109,7 @@ public class Graph {
         Node nodeCopy = node.getCopy(); // will not be null
         Node prevNodeCopy = null;
         if (prevNode != null) prevNodeCopy = nodesEntry[1].getCopy();
+        nodesAddedToQueue.remove(node);
 
         // connect nodes
         graphCopy.addNode(nodeCopy);
@@ -114,8 +120,10 @@ public class Graph {
 
         for (Node neighbor : node.neighbors){
             if (!originalNodeToCopyNodeMap.containsKey(neighbor)){
+                if (nodesAddedToQueue.contains(neighbor)) continue;
                 Node[] newEntry = {neighbor, nodeCopy};
                 nodeQueue.add(newEntry);
+                nodesAddedToQueue.add(neighbor);
             }
             else { // make them neighbors anyway!
                 nodeCopy.addNeighbor(originalNodeToCopyNodeMap.get(neighbor));

@@ -63,4 +63,8 @@ public class GridGraph extends Graph {
         clone.z = clone.z+1;
         return clone;
     }
+
+    public Node getNode(int x, int y) {
+        return nodeGrid[y][x];
+    }
 }

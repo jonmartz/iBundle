@@ -13,18 +13,23 @@ public class Agent {
     public int [] allocation;
     public HashSet<Bid> bids = new HashSet<>();
     public ISearcher searcher;
-    public Graph graph;
+    public GridGraph graph;
     public int id;
     public static int counter=1;
     public Bid currentBid;
 //    public int i = 0;
 
-    public Agent(Node start, Node goal, ISearcher searcher, Graph graph) {
+    public Agent(int startX, int startY, int goalX, int goalY, ISearcher searcher, String graphPath) {
         this.searcher = searcher;
-        HashMap<Node, Node> originalNodeToCopyNodeMap = new HashMap<>();
-        this.graph = graph.getCopy(originalNodeToCopyNodeMap);
-        this.start = originalNodeToCopyNodeMap.get(start);
-        this.goal = originalNodeToCopyNodeMap.get(goal);
+        graph = new GridGraph(graphPath);
+        this.start = graph.getNode(startX, startY);
+        this.goal = graph.getNode(goalX, goalY);
+
+//        HashMap<Node, Node> originalNodeToCopyNodeMap = new HashMap<>();
+//        this.graph = graph.getCopy(originalNodeToCopyNodeMap);
+//        this.start = originalNodeToCopyNodeMap.get(start);
+//        this.goal = originalNodeToCopyNodeMap.get(goal);
+
         this.id = counter;
         counter++;
 

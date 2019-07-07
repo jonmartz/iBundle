@@ -29,26 +29,27 @@ public class Main extends Application {
         primaryStage.show();
 
         // create graph from map
-        GridGraph graph = new GridGraph("./Resources/den312d.map");
+        String graphPath = "./Resources/ca_cave.map";
+        GridGraph graph = new GridGraph(graphPath);
         ArrayList<Agent> agents = new ArrayList<>();
 
-        // 1) random start and goals
-        int numAgents = 1;
-        HashSet<GridNode> startAndGoalNodes = new HashSet<>();
-        GridNode node;
-        for (int i = 0; i < numAgents*2; i++){
-            node = (GridNode) graph.getRandomNode();
-            while (startAndGoalNodes.contains(node))
-                node = (GridNode)graph.getRandomNode();
-            startAndGoalNodes.add(node);
-        }
-        int j = 0;
-        Node startNode = null;
-        for (GridNode gridNode : startAndGoalNodes){
-            if (j % 2 == 0) startNode = gridNode;
-            else agents.add(new Agent(startNode, gridNode, new BFSearcher(), graph));
-            j++;
-        }
+//        // 1) random start and goals
+//        int numAgents = 10;
+//        HashSet<GridNode> startAndGoalNodes = new HashSet<>();
+//        GridNode node;
+//        for (int i = 0; i < numAgents*2; i++){
+//            node = (GridNode) graph.getRandomNode();
+//            while (startAndGoalNodes.contains(node))
+//                node = (GridNode)graph.getRandomNode();
+//            startAndGoalNodes.add(node);
+//        }
+//        int j = 0;
+//        Node startNode = null;
+//        for (GridNode gridNode : startAndGoalNodes){
+//            if (j % 2 == 0) startNode = gridNode;
+//            else agents.add(new Agent(startNode, gridNode, new BFSearcher(), graph));
+//            j++;
+//        }
 
 //        // 2) manual start and goal nodes
 //        // test.map
@@ -59,18 +60,25 @@ public class Main extends Application {
 //        Agent agent5 = new Agent(graph.nodes.get(24), graph.nodes.get(5), new BFSearcher(), graph);
 //        Agent agent6 = new Agent(graph.nodes.get(21), graph.nodes.get(7), new BFSearcher(), graph);
 //        // test2.map
-////        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(14), new BFSearcher(), graph);
-////        Agent agent2 = new Agent(graph.nodes.get(9), graph.nodes.get(12), new BFSearcher(), graph);
-////        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
-////        Agent agent4 = new Agent(graph.nodes.get(21), graph.nodes.get(15), new BFSearcher(), graph);
-////        Agent agent5 = new Agent(graph.nodes.get(23), graph.nodes.get(5), new BFSearcher(), graph);
-////        Agent agent6 = new Agent(graph.nodes.get(20), graph.nodes.get(7), new BFSearcher(), graph);
-//        agents.add(agent1);
-//        agents.add(agent2);
-//        agents.add(agent3);
-//        agents.add(agent4);
-//        agents.add(agent5);
-//        agents.add(agent6);
+//        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(14), new BFSearcher(), graph);
+//        Agent agent2 = new Agent(graph.nodes.get(9), graph.nodes.get(12), new BFSearcher(), graph);
+//        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
+//        Agent agent4 = new Agent(graph.nodes.get(21), graph.nodes.get(15), new BFSearcher(), graph);
+//        Agent agent5 = new Agent(graph.nodes.get(23), graph.nodes.get(5), new BFSearcher(), graph);
+//        Agent agent6 = new Agent(graph.nodes.get(20), graph.nodes.get(7), new BFSearcher(), graph);
+        // ca_cave.map
+//        Node start = graph.getNode(117, 199);
+//        Node goal = graph.getNode(100, 191);
+        agents.add(new Agent(117, 199, 100, 191, new BFSearcher(), graphPath));
+        agents.add(new Agent(70, 174, 79, 156, new BFSearcher(), graphPath));
+        agents.add(new Agent(82, 59, 73, 78, new BFSearcher(), graphPath));
+        agents.add(new Agent(90, 192, 94, 212, new BFSearcher(), graphPath));
+        agents.add(new Agent(118, 194, 119, 216, new BFSearcher(), graphPath));
+        agents.add(new Agent(133, 173, 135, 153, new BFSearcher(), graphPath));
+        agents.add(new Agent(81, 43, 82, 64, new BFSearcher(), graphPath));
+        agents.add(new Agent(104, 205, 92, 188, new BFSearcher(), graphPath));
+        agents.add(new Agent(131, 82, 116, 68, new BFSearcher(), graphPath));
+        agents.add(new Agent(97, 168, 116, 158, new BFSearcher(), graphPath));
 
         // create auction
         Auction auction = new Auction(1, new WinnerDeterminator());
