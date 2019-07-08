@@ -68,7 +68,7 @@ public class Controller{
             for (int col = 0; col < grid[0].length; col++) {
                 if (grid[row][col] == -1) context.setFill(Color.BLACK);
                 else context.setFill(Color.WHITE);
-                context.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                context.fillRect(col * cellWidth, row * cellHeight, cellWidth+1, cellHeight+1);
             }
         }
     }

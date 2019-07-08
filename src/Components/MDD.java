@@ -3,6 +3,7 @@ package Components;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 
 public class MDD {
     public int cost;
@@ -67,27 +68,62 @@ public class MDD {
         return mddNode;
     }
 
+    // random
     public int[] getNextPath(){
-        gotFirstPath = false;
-        if (firstPathEver){
-            // to handle getting a path for the first time
-            firstPathEver = false;
-            gotFirstPath = true;
-            checkLegalPath(1);
+        // get random path
+        Random rand = new Random();
+        int t = 0;
+        for (ArrayList<MDDNode> layer : mddNodes){
+            if (t > 0) { // ignore first layer
+                offsets[t] = rand.nextInt(layer.size());
+                // make path legal
+                MDDNode curr = mddNodes[t].get(offsets[t]);
+                MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
+                while (!curr.neighbors.contains(prev)){
+                    offsets[t] += 1;
+                    if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
+                    curr = mddNodes[t].get(offsets[t]);
+                }
+            }
+            t++;
+            if (t == offsets.length) break; // ignore last layer
         }
-        else findNextPath(offsets.length-1);
+        // return path
         int[] nextPath = new int[cost+1];
         for (int i = 0; i < cost; i++)
             nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
         nextPath[cost] = goal.id;
 
+        // optional print
         ArrayList<String> stringPath = new ArrayList<>();
         for (Integer i : nextPath) stringPath.add(i.toString());
         System.out.println(String.join(" ",stringPath));
-        if (gotFirstPath) System.out.println("gotFirstPath");
 
         return nextPath;
     }
+
+//    // ordered
+//    public int[] getNextPath(){
+//        gotFirstPath = false;
+//        if (firstPathEver){
+//            // to handle getting a path for the first time
+//            firstPathEver = false;
+//            gotFirstPath = true;
+//            checkLegalPath(1);
+//        }
+//        else findNextPath(offsets.length-1);
+//        int[] nextPath = new int[cost+1];
+//        for (int i = 0; i < cost; i++)
+//            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
+//        nextPath[cost] = goal.id;
+//
+//        ArrayList<String> stringPath = new ArrayList<>();
+//        for (Integer i : nextPath) stringPath.add(i.toString());
+//        System.out.println(String.join(" ",stringPath));
+//        if (gotFirstPath) System.out.println("gotFirstPath");
+//
+//        return nextPath;
+//    }
 
     private void checkLegalPath(int t) {
         if (t == offsets.length) return; // on goal node

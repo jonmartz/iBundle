@@ -23,16 +23,13 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-//        FXMLLoader fxmlLoader = new FXMLLoader();
-//        Parent root = fxmlLoader.load(getClass().getResource("view.fxml").openStream());
-//        controller = fxmlLoader.getController();
-//        primaryStage.setTitle("iBundle");
-//        primaryStage.setScene(new Scene(root, 800 , 540));
-//        primaryStage.show();
+
+        boolean launchGUI = true;
 
 //        String[] graphPaths = {"./Resources/den502d.map", "./Resources/ost003d.map", "./Resources/brc202d.map"};
-        String[] graphPaths = {"./Resources/den312d.map"};
 //        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
+        String[] graphPaths = {"./Resources/den312d.map"};
+//        String[] graphPaths = {"./Resources/test2.map"};
         int[] agentCounts = {10};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
@@ -93,10 +90,19 @@ public class Main extends Application {
                 }
                 System.out.println("*****************");
 
-//                // launch GUI
-//                controller.initialize(graph.intGrid);
-//                for (Agent agent : agents) controller.addAgent(agent.allocation);
-//                controller.draw();
+                if (launchGUI) {
+                    FXMLLoader fxmlLoader = new FXMLLoader();
+                    Parent root = fxmlLoader.load(getClass().getResource("view.fxml").openStream());
+                    controller = fxmlLoader.getController();
+                    primaryStage.setTitle("iBundle");
+                    primaryStage.setScene(new Scene(root, 800, 540));
+                    primaryStage.show();
+                    controller.initialize(graph.intGrid);
+                    for (Agent agent : agents) controller.addAgent(agent.allocation);
+                    controller.draw();
+//                    System.out.println("Press enter for next scenario");
+//                    System.in.read();
+                }
             }
         }
 
