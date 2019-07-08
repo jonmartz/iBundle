@@ -81,10 +81,10 @@ public class MDD {
             nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
         nextPath[cost] = goal.id;
 
-//        ArrayList<String> stringPath = new ArrayList<>();
-//        for (Integer i : nextPath) stringPath.add(i.toString());
-//        System.out.println(String.join(" ",stringPath));
-//        if (gotFirstPath) System.out.println("gotFirstPath");
+        ArrayList<String> stringPath = new ArrayList<>();
+        for (Integer i : nextPath) stringPath.add(i.toString());
+        System.out.println(String.join(" ",stringPath));
+        if (gotFirstPath) System.out.println("gotFirstPath");
 
         return nextPath;
     }

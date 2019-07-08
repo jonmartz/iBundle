@@ -8,6 +8,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.FileWriter;
 import java.util.*;
 
 public class Main extends Application {
@@ -21,104 +23,100 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        Parent root = fxmlLoader.load(getClass().getResource("view.fxml").openStream());
-        controller = fxmlLoader.getController();
-        primaryStage.setTitle("iBundle");
-        primaryStage.setScene(new Scene(root, 800 , 540));
-        primaryStage.show();
+//        FXMLLoader fxmlLoader = new FXMLLoader();
+//        Parent root = fxmlLoader.load(getClass().getResource("view.fxml").openStream());
+//        controller = fxmlLoader.getController();
+//        primaryStage.setTitle("iBundle");
+//        primaryStage.setScene(new Scene(root, 800 , 540));
+//        primaryStage.show();
 
-        // create graph from map
-        String graphPath = "./Resources/test.map";
-        GridGraph graph = new GridGraph(graphPath);
-        ArrayList<Agent> agents = new ArrayList<>();
+//        String[] graphPaths = {"./Resources/den502d.map", "./Resources/ost003d.map", "./Resources/brc202d.map"};
+        String[] graphPaths = {"./Resources/den312d.map"};
+//        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
+        int[] agentCounts = {10};
+        List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
-        // 1) random start and goals
-        int numAgents = 5;
-        HashSet<GridNode> startAndGoalNodes = new HashSet<>();
-        GridNode node;
-        for (int i = 0; i < numAgents*2; i++){
-            node = (GridNode) graph.getRandomNode();
-            while (startAndGoalNodes.contains(node))
-                node = (GridNode)graph.getRandomNode();
-            startAndGoalNodes.add(node);
-        }
-        int j = 0;
-        GridNode startNode = null;
-        for (GridNode gridNode : startAndGoalNodes){
-            if (j % 2 == 0) startNode = gridNode;
-            else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), graphPath));
-            j++;
-        }
+        for (Integer numAgents : agentCounts) {
+            for (String graphPath : graphPaths) {
+                // create graph from map
+                GridGraph graph = new GridGraph(graphPath);
+                ArrayList<Agent> agents = new ArrayList<>();
 
-//        // 2) manual start and goal nodes
-//        // test.map
-//        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(15), new BFSearcher(), graph);
-//        Agent agent2 = new Agent(graph.nodes.get(10), graph.nodes.get(13), new BFSearcher(), graph);
-//        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
-//        Agent agent4 = new Agent(graph.nodes.get(22), graph.nodes.get(16), new BFSearcher(), graph);
-//        Agent agent5 = new Agent(graph.nodes.get(24), graph.nodes.get(5), new BFSearcher(), graph);
-//        Agent agent6 = new Agent(graph.nodes.get(21), graph.nodes.get(7), new BFSearcher(), graph);
-//        // test2.map
-//        Agent agent1 = new Agent(graph.nodes.get(2), graph.nodes.get(14), new BFSearcher(), graph);
-//        Agent agent2 = new Agent(graph.nodes.get(9), graph.nodes.get(12), new BFSearcher(), graph);
-//        Agent agent3 = new Agent(graph.nodes.get(5), graph.nodes.get(3), new BFSearcher(), graph);
-//        Agent agent4 = new Agent(graph.nodes.get(21), graph.nodes.get(15), new BFSearcher(), graph);
-//        Agent agent5 = new Agent(graph.nodes.get(23), graph.nodes.get(5), new BFSearcher(), graph);
-//        Agent agent6 = new Agent(graph.nodes.get(20), graph.nodes.get(7), new BFSearcher(), graph);
-        // ca_cave.map
-//        Node start = graph.getNode(117, 199);
-//        Node goal = graph.getNode(100, 191);
-//        agents.add(new Agent(117, 199, 100, 191, new BFSearcher(), graphPath));
-//        agents.add(new Agent(70, 174, 79, 156, new BFSearcher(), graphPath));
-//        agents.add(new Agent(82, 59, 73, 78, new BFSearcher(), graphPath));
-//        agents.add(new Agent(90, 192, 94, 212, new BFSearcher(), graphPath));
-//        agents.add(new Agent(118, 194, 119, 216, new BFSearcher(), graphPath));
-//        agents.add(new Agent(133, 173, 135, 153, new BFSearcher(), graphPath));
-//        agents.add(new Agent(81, 43, 82, 64, new BFSearcher(), graphPath));
-//        agents.add(new Agent(104, 205, 92, 188, new BFSearcher(), graphPath));
-//        agents.add(new Agent(131, 82, 116, 68, new BFSearcher(), graphPath));
-//        agents.add(new Agent(97, 168, 116, 158, new BFSearcher(), graphPath));
+                // 1) random start and goals
+                HashSet<GridNode> startAndGoalNodes = new HashSet<>();
+                GridNode node;
+                for (int i = 0; i < numAgents * 2; i++) {
+                    node = (GridNode) graph.getRandomNode();
+                    while (startAndGoalNodes.contains(node))
+                        node = (GridNode) graph.getRandomNode();
+                    startAndGoalNodes.add(node);
+                }
+                int j = 0;
+                GridNode startNode = null;
+                for (GridNode gridNode : startAndGoalNodes) {
+                    if (j % 2 == 0) startNode = gridNode;
+                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), graphPath));
+                    j++;
+                }
 
-        // create auction
-        Auction auction = new Auction(1, new WinnerDeterminator());
-        Set<Agent> remain = new HashSet<>(agents);
-        // run
-        while(!auction.finished){
-            iteration++;
+                // create auction
+                Auction auction = new Auction(1, new WinnerDeterminator());
 
-            // STAGE 1 - bidding
-            for (Agent agent : agents) {
-                if (agent.allocation == null)
+                // run
+                while (!auction.finished) {
+                    iteration++;
+
+                    // STAGE 1 - bidding
+                    for (Agent agent : agents) {
+                        if (agent.allocation == null)
+                            auction.addBid(agent.getNextBid());
+                        else {
+                            printAgentPath(agent);
+                            agent.allocation = null;
+                        }
+                    }
+                    System.out.println("*****************");
+
+                    // STAGE 2 - winner determination
+                    auction.determineWinners();
+
+                    // STAGE 3 - price update
+                    auction.updatePrices();
+                    System.out.println("iteration " + iteration);
+                    System.out.println("The agent(s) that a path was assigned to them are:");
+                }
+
+                System.out.println("The conclusion:");
+                for(int i=0;i<agents.size();i++)
                 {
-                    auction.addBid(agent.getNextBid());
+                    printAgentPath(agents.get(i));
                 }
-               else {
-                    printAgentPath(agent);
-                    agent.allocation = null;
-                }
+                System.out.println("*****************");
+
+//                // launch GUI
+//                controller.initialize(graph.intGrid);
+//                for (Agent agent : agents) controller.addAgent(agent.allocation);
+//                controller.draw();
             }
-            System.out.println("*****************");
-            // STAGE 2 - winner determination
-            auction.determineWinners();
-
-            // STAGE 3 - price update
-            auction.updatePrices();
-            System.out.println("iteration " +iteration);
-
         }
 
-        System.out.println("The conclusion:");
-        for(int i=0;i<agents.size();i++)
-        {
-            printAgentPath(agents.get(i));
-        }
-        System.out.println("*****************");
+        FileWriter csvWriter = new FileWriter("iBundleResults.csv");
+        csvWriter.append("Grid Name");
+        csvWriter.append(",");
+        csvWriter.append("Num Of Agents");
+        csvWriter.append(",");
+        csvWriter.append("iBundle Runtime");
+        csvWriter.append(",");
+        csvWriter.append("iBundle Solution Cost");
+        csvWriter.append("\n");
 
-        // launch GUI
-        controller.initialize(graph.intGrid);
-        for (Agent agent : agents) controller.addAgent(agent.allocation);
-        controller.draw();
+        for (List<String> rowData : rows) {
+            csvWriter.append(String.join(",", rowData));
+            csvWriter.append("\n");
+        }
+
+        csvWriter.flush();
+        csvWriter.close();
 
     }
 
