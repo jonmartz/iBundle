@@ -57,6 +57,8 @@ public class Agent {
 
     @Override
     public String toString() {
-        return "id="+id;
+        String mood = ":(";
+        if (allocation != null) mood = ":D";
+        return "id="+id+" "+mood;
     }
 }

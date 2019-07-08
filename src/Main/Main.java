@@ -29,27 +29,27 @@ public class Main extends Application {
         primaryStage.show();
 
         // create graph from map
-        String graphPath = "./Resources/ca_cave.map";
+        String graphPath = "./Resources/test.map";
         GridGraph graph = new GridGraph(graphPath);
         ArrayList<Agent> agents = new ArrayList<>();
 
-//        // 1) random start and goals
-//        int numAgents = 10;
-//        HashSet<GridNode> startAndGoalNodes = new HashSet<>();
-//        GridNode node;
-//        for (int i = 0; i < numAgents*2; i++){
-//            node = (GridNode) graph.getRandomNode();
-//            while (startAndGoalNodes.contains(node))
-//                node = (GridNode)graph.getRandomNode();
-//            startAndGoalNodes.add(node);
-//        }
-//        int j = 0;
-//        Node startNode = null;
-//        for (GridNode gridNode : startAndGoalNodes){
-//            if (j % 2 == 0) startNode = gridNode;
-//            else agents.add(new Agent(startNode, gridNode, new BFSearcher(), graph));
-//            j++;
-//        }
+        // 1) random start and goals
+        int numAgents = 5;
+        HashSet<GridNode> startAndGoalNodes = new HashSet<>();
+        GridNode node;
+        for (int i = 0; i < numAgents*2; i++){
+            node = (GridNode) graph.getRandomNode();
+            while (startAndGoalNodes.contains(node))
+                node = (GridNode)graph.getRandomNode();
+            startAndGoalNodes.add(node);
+        }
+        int j = 0;
+        GridNode startNode = null;
+        for (GridNode gridNode : startAndGoalNodes){
+            if (j % 2 == 0) startNode = gridNode;
+            else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), graphPath));
+            j++;
+        }
 
 //        // 2) manual start and goal nodes
 //        // test.map
@@ -69,16 +69,16 @@ public class Main extends Application {
         // ca_cave.map
 //        Node start = graph.getNode(117, 199);
 //        Node goal = graph.getNode(100, 191);
-        agents.add(new Agent(117, 199, 100, 191, new BFSearcher(), graphPath));
-        agents.add(new Agent(70, 174, 79, 156, new BFSearcher(), graphPath));
-        agents.add(new Agent(82, 59, 73, 78, new BFSearcher(), graphPath));
-        agents.add(new Agent(90, 192, 94, 212, new BFSearcher(), graphPath));
-        agents.add(new Agent(118, 194, 119, 216, new BFSearcher(), graphPath));
-        agents.add(new Agent(133, 173, 135, 153, new BFSearcher(), graphPath));
-        agents.add(new Agent(81, 43, 82, 64, new BFSearcher(), graphPath));
-        agents.add(new Agent(104, 205, 92, 188, new BFSearcher(), graphPath));
-        agents.add(new Agent(131, 82, 116, 68, new BFSearcher(), graphPath));
-        agents.add(new Agent(97, 168, 116, 158, new BFSearcher(), graphPath));
+//        agents.add(new Agent(117, 199, 100, 191, new BFSearcher(), graphPath));
+//        agents.add(new Agent(70, 174, 79, 156, new BFSearcher(), graphPath));
+//        agents.add(new Agent(82, 59, 73, 78, new BFSearcher(), graphPath));
+//        agents.add(new Agent(90, 192, 94, 212, new BFSearcher(), graphPath));
+//        agents.add(new Agent(118, 194, 119, 216, new BFSearcher(), graphPath));
+//        agents.add(new Agent(133, 173, 135, 153, new BFSearcher(), graphPath));
+//        agents.add(new Agent(81, 43, 82, 64, new BFSearcher(), graphPath));
+//        agents.add(new Agent(104, 205, 92, 188, new BFSearcher(), graphPath));
+//        agents.add(new Agent(131, 82, 116, 68, new BFSearcher(), graphPath));
+//        agents.add(new Agent(97, 168, 116, 158, new BFSearcher(), graphPath));
 
         // create auction
         Auction auction = new Auction(1, new WinnerDeterminator());
@@ -87,15 +87,10 @@ public class Main extends Application {
         while(!auction.finished){
             iteration++;
 
-            if (iteration == 4){
-                int x=5;
-            }
-
             // STAGE 1 - bidding
             for (Agent agent : agents) {
                 if (agent.allocation == null)
                 {
-
                     auction.addBid(agent.getNextBid());
                 }
                else {
@@ -110,7 +105,6 @@ public class Main extends Application {
             // STAGE 3 - price update
             auction.updatePrices();
             System.out.println("iteration " +iteration);
-            System.out.println("The agent(s) that a path was assigned to them are:");
 
         }
 

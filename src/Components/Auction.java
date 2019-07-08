@@ -49,7 +49,6 @@ public class Auction {
                 Collection<Bid> bids = this.bids.get(agent);
                 for (Bid bid : bids){
                     bid.price += epsilon;
-
                 }
             }
         }

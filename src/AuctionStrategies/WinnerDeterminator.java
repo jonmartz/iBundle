@@ -52,7 +52,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         for (Agent agent : this.allAgents) {
             if (agent.allocation == null) {
 
-               //System.out.println(agent.id +" id");
+                //System.out.println(agent.id +" id");
                 return false;
 
             }
@@ -78,7 +78,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             allPossibilities = new HashSet<>();
             //if (!ans.equals("")) {
 
-                //return;
+            //return;
             //}
 
         }
@@ -91,7 +91,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             return "";
         if (size == 1) {
             allPossibilities.add(str+index);
-           // if (assembleAndCheck(str + index))
+            // if (assembleAndCheck(str + index))
 
             checkAgentsInFixedSize(size, index + 1, str,allPossibilities);
         }
@@ -112,9 +112,17 @@ public class WinnerDeterminator implements IAuctionStrategy {
             allPossibilities2.add(temp);
 
         }
+
+        // System.out.println(allPossibilities2.size());
+
         for(int i=0;i<allPossibilities2.size();i++) {
+            //  System.out.println(allPossibilities2.get(i).size());
             for(int j=0;j<allPossibilities2.get(i).size();j++) {
-                if(assembleAndCheck(allPossibilities2.get(i).get(j)));
+
+
+                boolean flag = assembleAndCheck(allPossibilities2.get(i).get(j));
+                // System.out.println("check for "+allPossibilities2.get(i).get(j) +" res "+flag);
+                if(flag)
                     return;
             }
         }
@@ -169,6 +177,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
         //If we scanned all the agents
         if (index == agents.size()) {
+
             return checkAllPaths(paths, true);
         }
 
@@ -179,23 +188,28 @@ public class WinnerDeterminator implements IAuctionStrategy {
         bidHistoryList.sort(new CompareBid());
 
         int[] path;
-        boolean flag = false;
+        boolean flag2 = false;
+        int [] firstPath;
+        boolean flag =false;
         boolean compatible = false;
         for(Bid bid: bidHistoryList)
         {
-           // MDD mdd = currentAgent.currentBid.mdd;
-             MDD mdd = bid.mdd;
-
-
+            // MDD mdd = currentAgent.currentBid.mdd;
+            MDD mdd = bid.mdd;
+            flag2 = false;
             mdd.gotFirstPath = false;
-            while (!mdd.gotFirstPath){
+            firstPath = mdd.getNextPath();
+            path = firstPath;
 
+            while (!areEqual(firstPath,path) || !flag2){
+                flag2= true;
+                // printPath(path);
 
-                path = mdd.getNextPath();
 
 
                 paths.add(index, path);
                 if (checkAllPaths(paths, false)) {
+
                     compatible = true;
                     flag = flag || recursiveAssignmentCheck(index + 1, paths);
                     if (flag) {
@@ -204,14 +218,35 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 }
 
                 paths.remove(index);
-
+                path = mdd.getNextPath();
             }
 
         }
 
         return compatible && flag;
     }
-
+    private boolean areEqual(int [] a,int []b)
+    {
+        if(a.length!=b.length)
+            return false;
+        for(int i=0;i<a.length;i++)
+        {
+            if(a[i]!=b[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    private void printPath(int [] path)
+    {
+        System.out.print("path: ");
+        for(int i=0;i<path.length-1;i++)
+        {
+            System.out.print(path[i]+", ");
+        }
+        System.out.println(path[path.length-1]);
+    }
     private boolean checkAllPaths(List<int[]> paths, boolean toAllocate)
     {
 
@@ -280,13 +315,13 @@ public class WinnerDeterminator implements IAuctionStrategy {
                             //The agent won't disappear so they will collide
                             if(suspect.length<=iter)
                             {
-                               // System.out.println("don't disappear1");
+                                // System.out.println("don't disappear1");
                                 return false;
 
                             }
                             //Cross
                             if(current[iter-1] == suspect[iter]) {
-                             //   System.out.println("cross");
+                                //   System.out.println("cross");
                                 return false;
                             }
                         }
@@ -299,8 +334,8 @@ public class WinnerDeterminator implements IAuctionStrategy {
                         //Collision with an agent that already reached it's destination
 
                         if(timePathPair.getValue() != current && iter>=timePathPair.getKey()) {
-                          //  System.out.println("don't disappear2");
-                          //  System.out.println("iter "+iter+" time "+timePathPair.getKey()+" node num "+current[iter]);
+                            //  System.out.println("don't disappear2");
+                            //  System.out.println("iter "+iter+" time "+timePathPair.getKey()+" node num "+current[iter]);
                             return false;
                         }
                     }
@@ -567,7 +602,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         public int compare(String o1,String o2) {
             int numOfBids1 = sumNumOfBids(o1);
             int numOfBids2 = sumNumOfBids(o2);
-            return numOfBids1 - numOfBids2;
+            return -(numOfBids1 - numOfBids2);
         }
         private int sumNumOfBids(String str)
         {
@@ -579,7 +614,17 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 index = Integer.parseInt(split[i]);
                 sum+= this.agents.get(index).bids.size();
             }
-            return sum;
+            // return sum;
+
+            double avg = sum;
+            avg =avg/split.length;
+            double sunOfDistance = 0;
+            for(int i=0;i<split.length;i++)
+            {
+                index = Integer.parseInt(split[i]);
+                sunOfDistance+= Math.abs(this.agents.get(index).bids.size()-avg);
+            }
+            return (int)sunOfDistance;
         }
     }
 
