@@ -28,21 +28,22 @@ public class Main extends Application {
 
 //        String[] graphPaths = {"./Resources/den502d.map", "./Resources/ost003d.map", "./Resources/brc202d.map"};
 //        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
-        String[] graphPaths = {"./Resources/den312d.map"};
+        String[] mapNames = {"den312d"};
 //        String[] graphPaths = {"./Resources/test2.map"};
         int[] agentCounts = {10};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
-        for (Integer numAgents : agentCounts) {
-            for (String graphPath : graphPaths) {
+        for (Integer agentCount : agentCounts) {
+            for (String mapName : mapNames) {
+                String mapPath = "./Resources/"+mapName+".map";
                 // create graph from map
-                GridGraph graph = new GridGraph(graphPath);
+                GridGraph graph = new GridGraph(mapPath);
                 ArrayList<Agent> agents = new ArrayList<>();
 
                 // 1) random start and goals
                 HashSet<GridNode> startAndGoalNodes = new HashSet<>();
                 GridNode node;
-                for (int i = 0; i < numAgents * 2; i++) {
+                for (int i = 0; i < agentCount * 2; i++) {
                     node = (GridNode) graph.getRandomNode();
                     while (startAndGoalNodes.contains(node))
                         node = (GridNode) graph.getRandomNode();
@@ -52,7 +53,7 @@ public class Main extends Application {
                 GridNode startNode = null;
                 for (GridNode gridNode : startAndGoalNodes) {
                     if (j % 2 == 0) startNode = gridNode;
-                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), graphPath));
+                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
                     j++;
                 }
 
@@ -60,6 +61,7 @@ public class Main extends Application {
                 Auction auction = new Auction(1, new WinnerDeterminator());
 
                 // run
+                long startTime = System.currentTimeMillis();
                 while (!auction.finished) {
                     iteration++;
 
@@ -82,13 +84,24 @@ public class Main extends Application {
                     System.out.println("iteration " + iteration);
                     System.out.println("The agent(s) that a path was assigned to them are:");
                 }
+                long runtime = System.currentTimeMillis() - startTime;
 
+                int sumOfCosts = 0;
                 System.out.println("The conclusion:");
-                for(int i=0;i<agents.size();i++)
+                for(Agent agent : agents)
                 {
-                    printAgentPath(agents.get(i));
+                    sumOfCosts += agent.allocation.length;
+                    printAgentPath(agent);
                 }
                 System.out.println("*****************");
+
+                List<String> row = new ArrayList<>();
+                row.add(String.valueOf(agentCount));
+                row.add(mapName);
+                row.add(String.valueOf(runtime));
+                row.add(String.valueOf(sumOfCosts));
+
+                rows.add(row);
 
                 if (launchGUI) {
                     FXMLLoader fxmlLoader = new FXMLLoader();
@@ -107,14 +120,10 @@ public class Main extends Application {
         }
 
         FileWriter csvWriter = new FileWriter("iBundleResults.csv");
-        csvWriter.append("Grid Name");
-        csvWriter.append(",");
-        csvWriter.append("Num Of Agents");
-        csvWriter.append(",");
-        csvWriter.append("iBundle Runtime");
-        csvWriter.append(",");
-        csvWriter.append("iBundle Solution Cost");
-        csvWriter.append("\n");
+        csvWriter.append("Num Of Agents,");
+        csvWriter.append("Map Name,");
+        csvWriter.append("iBundle Runtime,");
+        csvWriter.append("iBundle Solution Cost\n");
 
         for (List<String> rowData : rows) {
             csvWriter.append(String.join(",", rowData));

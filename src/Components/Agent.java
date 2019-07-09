@@ -10,7 +10,7 @@ import java.util.HashSet;
 public class Agent {
     public Node start;
     public Node goal;
-    public int [] allocation;
+    public int[] allocation;
     public HashSet<Bid> bids = new HashSet<>();
     public ISearcher searcher;
     public GridGraph graph;
