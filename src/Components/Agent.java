@@ -4,14 +4,16 @@ import Main.Main;
 import Searchers.ISearcher;
 import jdk.nashorn.internal.objects.Global;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 public class Agent {
     public Node start;
     public Node goal;
     public int [] allocation;
-    public HashSet<Bid> bids = new HashSet<>();
+    public List<Bid> bids = new ArrayList<>();
     public ISearcher searcher;
     public GridGraph graph;
     public int id;

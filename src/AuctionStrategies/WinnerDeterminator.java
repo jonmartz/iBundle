@@ -71,7 +71,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         String ans = "";
         List<Set<String>> allPosibillitiesAllSize = new ArrayList<>();
         Set<String> allPossibilities = new HashSet<>();
-        for (int i = numOfAgents; i >= 1; i--) {
+      /*  for (int i = numOfAgents; i >= 1; i--) {
             checkAgentsInFixedSize(i, 0, "",allPossibilities);
 
             allPosibillitiesAllSize.add(allPossibilities);
@@ -81,8 +81,8 @@ public class WinnerDeterminator implements IAuctionStrategy {
             //return;
             //}
 
-        }
-        checkByOrder(allPosibillitiesAllSize);
+        }*/
+        checkByOrder();
     }
 
 
@@ -102,17 +102,68 @@ public class WinnerDeterminator implements IAuctionStrategy {
         return checkAgentsInFixedSize(size, index + 1, str,allPossibilities);
 
     }
-    private void checkByOrder(List<Set<String>> allPossibilities)
+
+    private void checkByOrder()
     {
 
-        List<List<String>> allPossibilities2 = new ArrayList<>();
-        for(int i=0;i<allPossibilities.size();i++) {
-            List<String> temp = new ArrayList<>(allPossibilities.get(i));
-            temp.sort(new CompareString(this.allAgents));
-            allPossibilities2.add(temp);
 
+        int sum =0 ;
+        //Maximal revenue
+        for(int i=0;i<this.allAgents.size();i++)
+        {
+
+            sum+= this.allAgents.get(i).bids.size() -1;
         }
 
+        //Maximal revenue to 0, sort by number of agents
+        for(int i=sum;i>=0;i--)
+        {
+            List<String> possible = new ArrayList<>();
+            getBidsToCheck(i,0,"",possible);
+            //All the possible MDD combo
+            possible.sort(new CompareString2());
+            System.out.println("sum "+i+" ");
+
+            //For every possibility,
+            for(int j=0;j<possible.size();j++)
+            {
+                HashMap<Agent,MDD> map = new HashMap<>();
+                String [] split = possible.get(j).split(",");
+                for(int k=0;k<split.length;k++)
+                {
+                    int index = split[k].indexOf("-");
+                    Agent a = this.allAgents.get(Integer.parseInt(split[k].substring(0,index)));
+
+                    map.put(a,a.bids.get(Integer.parseInt(split[k].substring(index+1))).mdd);
+
+                }
+                //summon martinez function
+
+            }
+
+
+
+
+
+        //    System.out.println(possible);
+        }
+
+
+
+
+
+
+
+
+
+    //    List<List<String>> allPossibilities2 = new ArrayList<>();
+    /*    List<String> allPossibilities2 = new ArrayList<>();
+        for(int i=0;i<allPossibilities.size();i++) {
+            allPossibilities2.addAll(allPossibilities.get(i));
+
+
+        }*/
+     /*   allPossibilities2.sort(new CompareString(this.allAgents));
         // System.out.println(allPossibilities2.size());
 
         for(int i=0;i<allPossibilities2.size();i++) {
@@ -125,7 +176,33 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 if(flag)
                     return;
             }
+        }*/
+
+    }
+
+    private void getBidsToCheck(int sum, int index, String str,List<String> allPossibilities) {
+
+        if(sum<0)
+            return;
+
+        if(index == this.allAgents.size())
+        {
+            //System.out.println("summm "+sum);
+            if(sum == 0 && str.length()!=0)
+            {
+
+                allPossibilities.add(str.substring(0,str.length()-1));
+
+            }
+            return;
         }
+
+        Agent a = this.allAgents.get(index);
+        for(int i=a.bids.size()-1;i>=0;i--)
+        {
+            getBidsToCheck(sum-i,index+1,str+index+"-"+i+",",allPossibilities);
+        }
+        getBidsToCheck(sum,index+1,str,allPossibilities);
 
     }
     /**
@@ -589,6 +666,14 @@ public class WinnerDeterminator implements IAuctionStrategy {
             return o1.mdd.mddNodes.length - o2.mdd.mddNodes.length;
         }
     }
+    public class CompareString2 implements Comparator<String>
+    {
+
+        @Override
+        public int compare(String o1, String o2) {
+            return o1.split(",").length - o2.split(",").length;
+        }
+    }
     public class CompareString implements Comparator<String>
     {
         List<Agent> agents;
@@ -610,7 +695,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             for(int i=0;i<split.length;i++)
             {
                 index = Integer.parseInt(split[i]);
-                sum+= this.agents.get(index).bids.size();
+                //sum+= this.agents.get(index).bids.
             }
             // return sum;
 
