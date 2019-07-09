@@ -72,21 +72,35 @@ public class MDD {
     public int[] getNextPath(){
         // get random path
         Random rand = new Random();
-        int t = 0;
-        for (ArrayList<MDDNode> layer : mddNodes){
-            if (t > 0) { // ignore first layer
-                offsets[t] = rand.nextInt(layer.size());
-                // make path legal
-                MDDNode curr = mddNodes[t].get(offsets[t]);
-                MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
-                while (!curr.neighbors.contains(prev)){
-                    offsets[t] += 1;
-                    if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
-                    curr = mddNodes[t].get(offsets[t]);
-                }
+        boolean first = true;
+        int middle = rand.nextInt(offsets.length-1)+1; // don't include first and last layers
+        // move forward from middle
+        for (int t = middle; t < offsets.length; t++){
+            offsets[t] = rand.nextInt(mddNodes[t].size());
+            if (first){ // don't modify middle
+                first = false;
+                continue;
             }
-            t++;
-            if (t == offsets.length) break; // ignore last layer
+            // make path legal
+            MDDNode curr = mddNodes[t].get(offsets[t]);
+            MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
+            while (!curr.neighbors.contains(prev)){
+                offsets[t] += 1;
+                if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
+                curr = mddNodes[t].get(offsets[t]);
+            }
+        }
+        // move backwards from middle
+        for (int t = middle-1; t > 0; t--){
+            offsets[t] = rand.nextInt(mddNodes[t].size());
+            // make path legal
+            MDDNode curr = mddNodes[t].get(offsets[t]);
+            MDDNode next = mddNodes[t+1].get(offsets[t+1]);
+            while (!curr.neighbors.contains(next)){
+                offsets[t] += 1;
+                if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
+                curr = mddNodes[t].get(offsets[t]);
+            }
         }
         // return path
         int[] nextPath = new int[cost+1];
