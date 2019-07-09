@@ -2,6 +2,7 @@ package Components;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -182,4 +183,16 @@ public class MDD {
             offsets[i] = 0;
         }
     }
+
+    /**
+     * Merge all the MDDs in agentMDDMap to look for collisions.
+     * @param agentMDDMap MDDs to merge
+     * @return In case there's a way to allocate a path to each agent without getting collisions:
+     * A mapping from agents to modified MDDs, where the modification is removing all conflicting nodes in path.
+     * Otherwise: return null.
+     */
+    public static HashMap<Agent, MDD> merge(HashMap<Agent, MDD> agentMDDMap) {
+        return null;
+    }
+
 }

@@ -105,8 +105,6 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
     private void checkByOrder()
     {
-
-
         int sum =0 ;
         //Maximal revenue
         for(int i=0;i<this.allAgents.size();i++)
@@ -137,13 +135,9 @@ public class WinnerDeterminator implements IAuctionStrategy {
                     map.put(a,a.bids.get(Integer.parseInt(split[k].substring(index+1))).mdd);
 
                 }
-                //summon martinez function
+                HashMap<Agent,MDD> mergedMap = MDD.merge(map);
 
             }
-
-
-
-
 
         //    System.out.println(possible);
         }

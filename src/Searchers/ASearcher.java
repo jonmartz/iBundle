@@ -10,8 +10,8 @@ import java.util.HashSet;
 
 public abstract class ASearcher implements ISearcher {
 
-    public Node start;
-    public Node goal;
+    private Node start;
+    private Node goal;
 
     @Override
     public MDD findShortestPaths(Node start, Node goal) {
