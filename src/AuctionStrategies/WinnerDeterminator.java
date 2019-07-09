@@ -205,6 +205,8 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 flag2= true;
                 // printPath(path);
 
+
+
                 paths.add(index, path);
                 if (checkAllPaths(paths, false)) {
 
