@@ -42,7 +42,7 @@ public class Agent {
 //        if (Main.iteration == 5){
 //            int x = 5;
 //        }
-        MDD mdd = searcher.findShortestPaths(start, goal);
+        MDD mdd = searcher.findShortestPaths(start, goal, this);
         start = graph.enlargeShortestPaths(mdd); // todo: maybe don't run if allocation granted
         return mdd;
     }

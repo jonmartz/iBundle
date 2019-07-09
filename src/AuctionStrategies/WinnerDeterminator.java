@@ -125,20 +125,18 @@ public class WinnerDeterminator implements IAuctionStrategy {
             //For every possibility,
             for(int j=0;j<possible.size();j++)
             {
-                HashMap<Agent,MDD> map = new HashMap<>();
+                ArrayList<MDD> mdds = new ArrayList<>();
                 String [] split = possible.get(j).split(",");
                 for(int k=0;k<split.length;k++)
                 {
                     int index = split[k].indexOf("-");
                     Agent a = this.allAgents.get(Integer.parseInt(split[k].substring(0,index)));
 
-                    map.put(a,a.bids.get(Integer.parseInt(split[k].substring(index+1))).mdd);
+                    mdds.add(a.bids.get(Integer.parseInt(split[k].substring(index+1))).mdd);
 
                 }
-                HashMap<Agent,MDD> mergedMap = MDD.merge(map);
-
+                if (MDD.getAllocations(mdds)) return;
             }
-
         //    System.out.println(possible);
         }
 
@@ -665,7 +663,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
 
         @Override
         public int compare(String o1, String o2) {
-            return o1.split(",").length - o2.split(",").length;
+            return -(o1.split(",").length - o2.split(",").length);
         }
     }
     public class CompareString implements Comparator<String>

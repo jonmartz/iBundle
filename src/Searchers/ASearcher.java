@@ -1,5 +1,6 @@
 package Searchers;
 
+import Components.Agent;
 import Components.MDD;
 import Components.MDDNode;
 import Components.Node;
@@ -7,14 +8,17 @@ import Components.Node;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public abstract class ASearcher implements ISearcher {
 
-    private Node start;
-    private Node goal;
+    public Agent agent;
+    public Node start;
+    public Node goal;
 
     @Override
-    public MDD findShortestPaths(Node start, Node goal) {
+    public MDD findShortestPaths(Node start, Node goal, Agent agent) {
+        this.agent = agent;
         this.start = start;
         this.goal = goal;
         start.distance = 0;
@@ -57,15 +61,15 @@ public abstract class ASearcher implements ISearcher {
     private MDD getSolution() {
 
         // make new MDD
-        MDD mdd = new MDD(goal.distance, start, goal);
+        MDD mdd = new MDD(goal.distance, start, goal, agent);
         int currentDistance = goal.distance;
-        HashSet<MDDNode> currentLayer = new HashSet<>(); // all nodes at distance n from start
+        ArrayList<MDDNode> currentLayer = new ArrayList<>(); // all nodes at distance n from start
         HashSet<Node> nodesAddedToMDD = new HashSet<>();
-        MDDNode mddGoal = new MDDNode(goal, currentDistance);
+        MDDNode mddGoal = new MDDNode(goal, currentDistance, mdd);
         currentLayer.add(mddGoal);
 
         while (!currentLayer.isEmpty()){
-            HashSet<MDDNode> previousLayer = new HashSet<>();
+            ArrayList<MDDNode> previousLayer = new ArrayList<>();
             HashMap<Node, MDDNode> previousLayerNodeToMDDNodeMap = new HashMap<>();
             for (MDDNode current : currentLayer){
                 if (nodesAddedToMDD.contains(current.node)) continue;
@@ -80,7 +84,7 @@ public abstract class ASearcher implements ISearcher {
                         originalMddNode.addNeighbor(previousLayerNodeToMDDNodeMap.get(previousNode));
                     }
                     else {
-                        MDDNode previousMddNode = new MDDNode(previousNode, currentDistance - 1);
+                        MDDNode previousMddNode = new MDDNode(previousNode, currentDistance - 1, mdd);
                         originalMddNode.addNeighbor(previousMddNode);
                         previousLayerNodeToMDDNodeMap.put(previousMddNode.node, previousMddNode);
                         previousLayer.add(previousMddNode);
