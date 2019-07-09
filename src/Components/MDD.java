@@ -3,6 +3,10 @@ package Components;
 import java.util.*;
 
 public class MDD {
+    private static int neighsAdded; // test
+    private static int neighsVisited; // test
+    private static int littleAdded = 0;
+    private static boolean print = false;
     public int cost;
     public HashSet<Node> nodes = new HashSet<>();
     public ArrayList<MDDNode>[] mddNodes; // array of array lists. mddNodes[i] = all nodes in time i
@@ -114,7 +118,7 @@ public class MDD {
 //        // optional print
 //        ArrayList<String> stringPath = new ArrayList<>();
 //        for (Integer i : nextPath) stringPath.add(i.toString());
-//        System.out.println(String.join(" ",stringPath));
+//        print(String.join(" ",stringPath));
 
         return nextPath;
     }
@@ -136,8 +140,8 @@ public class MDD {
 //
 //        ArrayList<String> stringPath = new ArrayList<>();
 //        for (Integer i : nextPath) stringPath.add(i.toString());
-//        System.out.println(String.join(" ",stringPath));
-//        if (gotFirstPath) System.out.println("gotFirstPath");
+//        print(String.join(" ",stringPath));
+//        if (gotFirstPath) print("gotFirstPath");
 //
 //        return nextPath;
 //    }
@@ -192,13 +196,14 @@ public class MDD {
      *         else: null.
      */
     public static boolean getAllocations(ArrayList<MDD> mdds) {
+        print("getting alloc, mdds = "+mdds.size());
         if (mdds.size() == 1){
             mdds.get(0).agent.allocation = mdds.get(0).getNextPath();
             return true;
         }
 
         // If not so lucky:
-        LinkedList<MergedState> openStack = new LinkedList<>();
+        PriorityQueue<MergedState> openStack = new PriorityQueue<>(new stateComparator());
         HashSet<String> visited = new HashSet<>();
 
         int maxCost = 0;
@@ -208,30 +213,45 @@ public class MDD {
         MergedState startState = new MergedState(0, new int[mdds.size()]);
         MergedState goalState = new MergedState(maxCost, new int[mdds.size()]);
 
-        openStack.addFirst(startState);
+        print("max cost = " + maxCost);
+
+        openStack.add(startState);
         while (!openStack.isEmpty()){
-            MergedState currentState = openStack.removeFirst();
+            MergedState currentState = null;
+//            if (littleAdded > 100){
+//                littleAdded = 0;
+//                System.out.println("too little added");
+//                return false;
+//            }
+//            else currentState = openStack.remove();
+            currentState = openStack.remove();
+            print("time = " + currentState.time);
             if (currentState.equals(goalState)) {
                 assignAllocations(mdds, currentState);
                 return true;
             }
-            if (visited.contains(currentState.id)) continue;
+            if (visited.contains(currentState.id)){
+                print("             visited");
+                continue;
+            }
             visited.add(currentState.id);
             if (hasCollision(mdds, currentState)) continue;
 
             // get all actual MDDNodes in current state
             ArrayList<MDDNode> mddNodes = new ArrayList<>();
-            for (int i = 0; i < mdds.size(); i++){
-                mddNodes.add(mdds.get(i).getTime(currentState.time).get(currentState.offsets[i]));
-            }
+            for (int i = 0; i < mdds.size(); i++) mddNodes.add(mdds.get(i).getTime(currentState.time).get(currentState.offsets[i]));
+            neighsAdded = 0;
+            neighsVisited = 0;
             addNeighbors(currentState, openStack, visited, mddNodes, new ArrayList<>());
-
-
+            print("                    n.added="+neighsAdded);
+            print("                    n.visited="+neighsVisited);
+            if (neighsAdded < neighsVisited*0.1) littleAdded += 1;
+            else littleAdded = 0;
         }
         return false;
     }
 
-    private static void addNeighbors(MergedState currentState, LinkedList<MergedState> openStack,
+    private static void addNeighbors(MergedState currentState, PriorityQueue<MergedState> openStack,
                                      HashSet<String> visited, ArrayList<MDDNode> mddNodes, ArrayList<Integer> offsetList) {
         if (offsetList.size() == mddNodes.size()){ // generate neighbor
             int[] offsets = new int[offsetList.size()];
@@ -241,7 +261,11 @@ public class MDD {
             MergedState neighbor = new MergedState(currentState.time+1, offsets);
             if (!visited.contains(neighbor.id)){
                 neighbor.prev = currentState;
-                openStack.addFirst(neighbor);
+                openStack.add(neighbor);
+                neighsAdded++;
+            }
+            else{
+                neighsVisited++;
             }
             return;
         }
@@ -265,7 +289,10 @@ public class MDD {
         // check for same position collision
         for (int i = 0; i < mdds.size(); i++){
             int nodeID = mdds.get(i).getTime(currentState.time).get(currentState.offsets[i]).node.id;
-            if (nodeIDs.contains(nodeID)) return true;
+            if (nodeIDs.contains(nodeID)){
+                print("collision");
+                return true;
+            }
             nodeIDs.add(nodeID);
         }
         // check for swap position collision
@@ -275,7 +302,10 @@ public class MDD {
             for (int i = 0; i < mdds.size(); i++) {
                 int idPrev = mdds.get(i).getTime(previousState.time).get(previousState.offsets[i]).node.id;
                 int idCurr = mdds.get(i).getTime(currentState.time).get(currentState.offsets[i]).node.id;
-                if (nodeIDpairs.contains(String.valueOf(idCurr)+" "+String.valueOf(idPrev))) return true;
+                if (nodeIDpairs.contains(String.valueOf(idCurr)+" "+String.valueOf(idPrev))){
+                    print("collision");
+                    return true;
+                }
                 nodeIDpairs.add(String.valueOf(idPrev)+" "+String.valueOf(idCurr));
             }
         }
@@ -286,19 +316,32 @@ public class MDD {
      * Assign path to each allocation;
      */
     private static void assignAllocations(ArrayList<MDD> mdds, MergedState currentState) {
-        ArrayList<int[]> allocations = new ArrayList<>();
+        // Build allocations including extensions
+        ArrayList<LinkedList<Integer>> allocations = new ArrayList<>();
         boolean first = true;
         while (currentState != null){
             for (int i = 0; i < mdds.size(); i++){
-                if (first) allocations.add(new int[currentState.time+1]);
+                if (first) allocations.add(new LinkedList<>());
                 int nodeID = mdds.get(i).getTime(currentState.time).get(currentState.offsets[i]).node.id;
-                allocations.get(i)[currentState.time] = nodeID;
+                allocations.get(i).addFirst(nodeID);
             }
             currentState = currentState.prev;
             first = false;
         }
+        // Remove extensions
         for (int i = 0; i < allocations.size(); i++){
-            mdds.get(i).agent.allocation = allocations.get(i);
+            LinkedList<Integer> allocationWithExt = allocations.get(i);
+            int extension = 0;
+            for (int j = allocationWithExt.size()-2; j >= 0; j--){
+                if (allocationWithExt.get(j).equals(allocationWithExt.get(j + 1)))
+                    extension++;
+                else break;
+            }
+            int[] allocation = new int[allocationWithExt.size()-extension];
+            for (int j = 0; j < allocation.length; j++){
+                allocation[j] = allocationWithExt.get(j);
+            }
+            mdds.get(i).agent.allocation = allocation;
         }
     }
 
@@ -307,4 +350,15 @@ public class MDD {
         return mddNodes[cost];
     }
 
+    private static class stateComparator implements Comparator<MergedState>{
+
+        @Override
+        public int compare(MergedState o1, MergedState o2) {
+            return o2.time - o1.time;
+        }
+    }
+    
+    private static void print(String s){
+        if (print) System.out.println(s);
+    }
 }

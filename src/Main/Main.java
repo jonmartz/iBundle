@@ -28,9 +28,9 @@ public class Main extends Application {
 
 //        String[] graphPaths = {"./Resources/den502d.map", "./Resources/ost003d.map", "./Resources/brc202d.map"};
 //        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
-        String[] mapNames = {"test2"};
+        String[] mapNames = {"den312d"};
 //        String[] graphPaths = {"./Resources/test2.map"};
-        int[] agentCounts = {3};
+        int[] agentCounts = {10};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
@@ -40,26 +40,26 @@ public class Main extends Application {
                 GridGraph graph = new GridGraph(mapPath);
                 ArrayList<Agent> agents = new ArrayList<>();
 
-//                // 1) random start and goals
-//                HashSet<GridNode> startAndGoalNodes = new HashSet<>();
-//                GridNode node;
-//                for (int i = 0; i < agentCount * 2; i++) {
-//                    node = (GridNode) graph.getRandomNode();
-//                    while (startAndGoalNodes.contains(node))
-//                        node = (GridNode) graph.getRandomNode();
-//                    startAndGoalNodes.add(node);
-//                }
-//                int j = 0;
-//                GridNode startNode = null;
-//                for (GridNode gridNode : startAndGoalNodes) {
-//                    if (j % 2 == 0) startNode = gridNode;
-//                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
-//                    j++;
-//                }
+                // 1) random start and goals
+                HashSet<GridNode> startAndGoalNodes = new HashSet<>();
+                GridNode node;
+                for (int i = 0; i < agentCount * 2; i++) {
+                    node = (GridNode) graph.getRandomNode();
+                    while (startAndGoalNodes.contains(node))
+                        node = (GridNode) graph.getRandomNode();
+                    startAndGoalNodes.add(node);
+                }
+                int j = 0;
+                GridNode startNode = null;
+                for (GridNode gridNode : startAndGoalNodes) {
+                    if (j % 2 == 0) startNode = gridNode;
+                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
+                    j++;
+                }
 
-                // 2) manual
-                agents.add(new Agent(1, 0, 3, 4, new BFSearcher(), mapPath));
-                agents.add(new Agent(0, 2, 2, 2, new BFSearcher(), mapPath));
+//                // 2) manual
+//                agents.add(new Agent(1, 0, 3, 4, new BFSearcher(), mapPath));
+//                agents.add(new Agent(0, 2, 2, 2, new BFSearcher(), mapPath));
 
                 // create auction
                 Auction auction = new Auction(1, new WinnerDeterminator());

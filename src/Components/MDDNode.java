@@ -11,9 +11,6 @@ public class MDDNode{
     public int time;
     public LinkedHashSet<MDDNode> neighbors = new LinkedHashSet<>();
     public ArrayList<MDDNode> nextNeighbors = new ArrayList<>(); // for MDD merging
-    public MDDNode prev; // for MDD merging
-    public int extensionCount = 0; // for MDD merging
-    public int neighborOffset = 0; // for MDD merging
     public MDD mdd; // for MDD merging
 
     public MDDNode(Node node, int time, MDD mdd){
