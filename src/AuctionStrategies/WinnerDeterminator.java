@@ -120,7 +120,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             getBidsToCheck(i,0,"",possible);
             //All the possible MDD combo
             possible.sort(new CompareString2());
-            System.out.println("sum "+i+" ");
+            System.out.println("revenue "+i);
 
             //For every possibility,
             for(int j=0;j<possible.size();j++)

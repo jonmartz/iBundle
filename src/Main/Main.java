@@ -9,6 +9,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
 
@@ -26,79 +29,95 @@ public class Main extends Application {
 
         boolean launchGUI = true;
 
-//        String[] graphPaths = {"./Resources/den502d.map", "./Resources/ost003d.map", "./Resources/brc202d.map"};
-//        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
-        String[] mapNames = {"den312d"};
-//        String[] graphPaths = {"./Resources/test2.map"};
-        int[] agentCounts = {10};
+//        String[] mapNames = {"den502d", "ost003d", "brc202d"};
+//        String[] mapNames = {"ost003d", "brc202d"};
+        String[] mapNames = {"ost003d"};
+//        int[] agentCounts = {5, 10, 15};
+        int[] agentCounts = {15};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
             for (String mapName : mapNames) {
+                iteration = 0;
+                MDD.resetCheckedSubsets();
                 String mapPath = "./Resources/"+mapName+".map";
                 // create graph from map
                 GridGraph graph = new GridGraph(mapPath);
                 ArrayList<Agent> agents = new ArrayList<>();
 
-                // 1) random start and goals
-                HashSet<GridNode> startAndGoalNodes = new HashSet<>();
-                GridNode node;
-                for (int i = 0; i < agentCount * 2; i++) {
-                    node = (GridNode) graph.getRandomNode();
-                    while (startAndGoalNodes.contains(node))
-                        node = (GridNode) graph.getRandomNode();
-                    startAndGoalNodes.add(node);
-                }
-                int j = 0;
-                GridNode startNode = null;
-                for (GridNode gridNode : startAndGoalNodes) {
-                    if (j % 2 == 0) startNode = gridNode;
-                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
-                    j++;
+//                // 1) random start and goals
+//                HashSet<GridNode> startAndGoalNodes = new HashSet<>();
+//                GridNode node;
+//                for (int i = 0; i < agentCount * 2; i++) {
+//                    node = (GridNode) graph.getRandomNode();
+//                    while (startAndGoalNodes.contains(node))
+//                        node = (GridNode) graph.getRandomNode();
+//                    startAndGoalNodes.add(node);
+//                }
+//                int j = 0;
+//                GridNode startNode = null;
+//                for (GridNode gridNode : startAndGoalNodes) {
+//                    if (j % 2 == 0) startNode = gridNode;
+//                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
+//                    j++;
+//                }
+
+                // 4) from instance
+                File file = new File("./Resources/instances/"+mapName+"-"+agentCount+"-0");
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] s = line.trim().split(",");
+                    int startX = Integer.parseInt(s[4]);
+                    int startY = Integer.parseInt(s[3]);
+                    int goalX = Integer.parseInt(s[2]);
+                    int goalY = Integer.parseInt(s[1]);
+                    agents.add(new Agent(startX, startY, goalX, goalY, new BFSearcher(), mapPath));
                 }
 
-//                // 2) manual
+//                // 3) manual
 //                agents.add(new Agent(1, 0, 3, 4, new BFSearcher(), mapPath));
 //                agents.add(new Agent(0, 2, 2, 2, new BFSearcher(), mapPath));
 
                 // create auction
                 Auction auction = new Auction(1, new WinnerDeterminator());
+                System.out.println("*****************");
+                System.out.println("map: " + mapName+", agents: "+agentCount);
 
                 // run
                 long startTime = System.currentTimeMillis();
                 while (!auction.finished) {
                     iteration++;
+                    System.out.println("------------");
+                    System.out.println("iteration " + iteration);
 
                     // STAGE 1 - bidding
                     for (Agent agent : agents) {
                         if (agent.allocation == null)
                             auction.addBid(agent.getNextBid());
                         else {
-                            printAgentPath(agent);
+//                            printAgentPath(agent);
                             agent.allocation = null;
                         }
                     }
-                    System.out.println("*****************");
 
                     // STAGE 2 - winner determination
                     auction.determineWinners();
 
                     // STAGE 3 - price update
                     auction.updatePrices();
-                    System.out.println("iteration " + iteration);
-                    System.out.println("The agent(s) that a path was assigned to them are:");
                 }
                 long runtime = System.currentTimeMillis() - startTime;
 
                 int sumOfCosts = 0;
-                System.out.println("The conclusion:");
+//                System.out.println("The conclusion:");
                 for(Agent agent : agents)
                 {
-                    sumOfCosts += agent.allocation.length;
-                    printAgentPath(agent);
+                    sumOfCosts += agent.allocation.length-1;
+//                    printAgentPath(agent);
                 }
-                System.out.println("*****************");
-
+//                System.out.println("*****************");
+                System.out.println("finished! runtime="+runtime+"ms, cost="+sumOfCosts);
                 List<String> row = new ArrayList<>();
                 row.add(String.valueOf(agentCount));
                 row.add(mapName);

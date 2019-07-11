@@ -2,10 +2,13 @@ package Components;
 
 import java.util.*;
 
+import static javax.swing.UIManager.getString;
+
 public class MDD {
     private static int neighsAdded; // test
     private static int neighsVisited; // test
     private static int littleAdded = 0;
+    private static HashMap<String, Boolean> checkedMddSubsets;
     private static boolean print = false;
     public int cost;
     public HashSet<Node> nodes = new HashSet<>();
@@ -30,164 +33,68 @@ public class MDD {
         this.agent = agent;
     }
 
-    public boolean isNodeThere(int id)
-    {
-        for(int i=0;i<this.mddNodes.length;i++)
-        {
-            for(int j=0;j<this.mddNodes[i].size();j++)
-            {
-                if(this.mddNodes[i].get(j).node.id == id)
-                    return true;
-            }
-        }
-        return false;
+    public static void resetCheckedSubsets(){
+        MDD.checkedMddSubsets = new HashMap<>();
     }
 
-    /**
-     * Adds an MDDNode to the correct time t.
-     * @param mddNode to add
-     * @return If there's already a node with that id in time t, returns that MDDNode.
-     *         Else, returns the argument MDDNode.
-     */
-    public MDDNode add(MDDNode mddNode){
-        nodes.add(mddNode.node);
-        ArrayList<MDDNode> mddNodesAtTimeT = mddNodes[mddNode.time];
-        if (mddNodesAtTimeT == null){ // if first node to add to time t
-            mddNodesAtTimeT = new ArrayList<>();
-            mddNodes[mddNode.time] = mddNodesAtTimeT;
-            mddNode.offset = 0;
-            mddNodesAtTimeT.add(mddNode);
-        }
-        else{ // look if node with id is already in time t
-            boolean found = false;
-            for (MDDNode current : mddNodesAtTimeT){
-                if (current.node.id == mddNode.node.id){
-                    mddNode = current;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found){
-                mddNode.offset = mddNodesAtTimeT.size();
-                mddNodesAtTimeT.add(mddNode);
-            }
-        }
-        return mddNode;
-    }
-
-    // random
-    public int[] getNextPath(){
-        // get random path
-        Random rand = new Random();
-        boolean first = true;
-        int middle = rand.nextInt(offsets.length-1)+1; // don't include first and last layers
-        // move forward from middle
-        for (int t = middle; t < offsets.length; t++){
-            offsets[t] = rand.nextInt(mddNodes[t].size());
-            if (first){ // don't modify middle
-                first = false;
-                continue;
-            }
-            // make path legal
-            MDDNode curr = mddNodes[t].get(offsets[t]);
-            MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
-            while (!curr.neighbors.contains(prev)){
-                offsets[t] += 1;
-                if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
-                curr = mddNodes[t].get(offsets[t]);
-            }
-        }
-        // move backwards from middle
-        for (int t = middle-1; t > 0; t--){
-            offsets[t] = rand.nextInt(mddNodes[t].size());
-            // make path legal
-            MDDNode curr = mddNodes[t].get(offsets[t]);
-            MDDNode next = mddNodes[t+1].get(offsets[t+1]);
-            while (!curr.neighbors.contains(next)){
-                offsets[t] += 1;
-                if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
-                curr = mddNodes[t].get(offsets[t]);
-            }
-        }
-        // return path
-        int[] nextPath = new int[cost+1];
-        for (int i = 0; i < cost; i++)
-            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
-        nextPath[cost] = goal.id;
-
-//        // optional print
-//        ArrayList<String> stringPath = new ArrayList<>();
-//        for (Integer i : nextPath) stringPath.add(i.toString());
-//        print(String.join(" ",stringPath));
-
-        return nextPath;
-    }
-
-//    // ordered
-//    public int[] getNextPath(){
-//        gotFirstPath = false;
-//        if (firstPathEver){
-//            // to handle getting a path for the first time
-//            firstPathEver = false;
-//            gotFirstPath = true;
-//            checkLegalPath(1);
+    public static boolean getAllocations(ArrayList<MDD> mdds) {
+        return getSubAllocations(mdds);
+//
+//        MDD.print = false;
+//        mdds.sort(new MDDComparator());
+//        System.out.println(mdds.size()+" mdd set: "+getHashString(mdds));
+//
+//        // Check for every possible subset for collisions...
+//        Boolean subsetFeasible = MDD.checkedMddSubsets.get(getHashString(mdds));
+//        if (subsetFeasible != null) {
+//            if (!subsetFeasible) return false;
 //        }
-//        else findNextPath(offsets.length-1);
-//        int[] nextPath = new int[cost+1];
-//        for (int i = 0; i < cost; i++)
-//            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
-//        nextPath[cost] = goal.id;
-//
-//        ArrayList<String> stringPath = new ArrayList<>();
-//        for (Integer i : nextPath) stringPath.add(i.toString());
-//        print(String.join(" ",stringPath));
-//        if (gotFirstPath) print("gotFirstPath");
-//
-//        return nextPath;
-//    }
-
-    private void checkLegalPath(int t) {
-        if (t == offsets.length) return; // on goal node
-        MDDNode curr = mddNodes[t].get(offsets[t]);
-        MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
-        if (!curr.neighbors.contains(prev)){
-            // move to next node in time t
-            if (mddNodes[t].size() == offsets[t]+1){
-                // can happen only one time step after the modified
-                // time step x in findNextPath: no more legal nodes,
-                // so go back and advance in x
-                findNextPath(t);
-                return;
-            }
-            offsets[t]+=1;
-            checkLegalPath(t);
-        }
-        else checkLegalPath(t+1);
+//        else {
+//            for (int i = 2; i < mdds.size(); i++) {
+//                System.out.println("    checking subset size "+i);
+//                if (!checkAllSubsets(mdds, new ArrayList<>(), i, 0)) {
+//                    resetAllocations(mdds);
+//                    System.out.println("        FAIL");
+//                    return false;
+//                }
+//            }
+//        }
+////        MDD.print = true;
+//        resetAllocations(mdds);
+//        System.out.println("checking whole set");
+//        boolean result = getSubAllocations(mdds);
+//        if (!result) System.out.println("        FAIL");
+//        return result;
     }
 
-    private void findNextPath(int t){
-        resetOffsets(t+1);
-        if (t == 0){
-            // found all paths! reset everything
-            gotFirstPath = true;
-            checkLegalPath(1);
-            return;
-        }
-        if (mddNodes[t].size() == offsets[t]+1){
-            // found all paths from t, so change offset at t-1
-            findNextPath(t-1);
-        }
-        else{
-            // move to next node in time t
-            offsets[t]+=1;
-            checkLegalPath(t);
-        }
+    private static void resetAllocations(ArrayList<MDD> mdds) {
+        for (MDD mdd : mdds) mdd.agent.allocation = null;
     }
 
-    private void resetOffsets(int t) {
-        for (int i = t; i < offsets.length; i++){
-            offsets[i] = 0;
+    private static String getHashString(ArrayList<MDD> mdds) {
+        ArrayList<String> strings = new ArrayList<>();
+        for (MDD mdd : mdds) strings.add(mdd.toString());
+        return String.join(" ",strings);
+    }
+
+    public static boolean checkAllSubsets(ArrayList<MDD> mdds, ArrayList<MDD> mddSubset, int n, int offset){
+        Boolean subsetFeasible = null;
+        if (mddSubset.size() >= 2){
+            subsetFeasible = MDD.checkedMddSubsets.get(getHashString(mddSubset));
+            if (subsetFeasible != null && !subsetFeasible) return false;
         }
+        if (n == 0){
+            if (subsetFeasible != null) return subsetFeasible;
+            subsetFeasible = getSubAllocations(mddSubset);
+            MDD.checkedMddSubsets.put(getHashString(mddSubset), subsetFeasible);
+            return subsetFeasible;
+        }
+        for (int i = offset; i < mdds.size(); i++){
+            ArrayList<MDD> mddSubsetClone = new ArrayList<>(mddSubset);
+            mddSubsetClone.add(mdds.get(i));
+            if (!checkAllSubsets(mdds, mddSubsetClone, n-1, i+1)) return false;
+        }
+        return true;
     }
 
     /**
@@ -195,7 +102,7 @@ public class MDD {
      * @return If there are paths with no collisions for all agents: mapping from agents to allocations.
      *         else: null.
      */
-    public static boolean getAllocations(ArrayList<MDD> mdds) {
+    public static boolean getSubAllocations(ArrayList<MDD> mdds) {
         print("getting alloc, mdds = "+mdds.size());
         if (mdds.size() == 1){
             mdds.get(0).agent.allocation = mdds.get(0).getNextPath();
@@ -357,8 +264,167 @@ public class MDD {
             return o2.time - o1.time;
         }
     }
-    
+
     private static void print(String s){
         if (print) System.out.println(s);
+    }
+
+    /**
+     * Adds an MDDNode to the correct time t.
+     * @param mddNode to add
+     * @return If there's already a node with that id in time t, returns that MDDNode.
+     *         Else, returns the argument MDDNode.
+     */
+    public MDDNode add(MDDNode mddNode){
+        nodes.add(mddNode.node);
+        ArrayList<MDDNode> mddNodesAtTimeT = mddNodes[mddNode.time];
+        if (mddNodesAtTimeT == null){ // if first node to add to time t
+            mddNodesAtTimeT = new ArrayList<>();
+            mddNodes[mddNode.time] = mddNodesAtTimeT;
+            mddNode.offset = 0;
+            mddNodesAtTimeT.add(mddNode);
+        }
+        else{ // look if node with id is already in time t
+            boolean found = false;
+            for (MDDNode current : mddNodesAtTimeT){
+                if (current.node.id == mddNode.node.id){
+                    mddNode = current;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found){
+                mddNode.offset = mddNodesAtTimeT.size();
+                mddNodesAtTimeT.add(mddNode);
+            }
+        }
+        return mddNode;
+    }
+
+    // random
+    public int[] getNextPath(){
+        // get random path
+        Random rand = new Random();
+        boolean first = true;
+        int middle = rand.nextInt(offsets.length-1)+1; // don't include first and last layers
+        // move forward from middle
+        for (int t = middle; t < offsets.length; t++){
+            offsets[t] = rand.nextInt(mddNodes[t].size());
+            if (first){ // don't modify middle
+                first = false;
+                continue;
+            }
+            // make path legal
+            MDDNode curr = mddNodes[t].get(offsets[t]);
+            MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
+            while (!curr.neighbors.contains(prev)){
+                offsets[t] += 1;
+                if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
+                curr = mddNodes[t].get(offsets[t]);
+            }
+        }
+        // move backwards from middle
+        for (int t = middle-1; t > 0; t--){
+            offsets[t] = rand.nextInt(mddNodes[t].size());
+            // make path legal
+            MDDNode curr = mddNodes[t].get(offsets[t]);
+            MDDNode next = mddNodes[t+1].get(offsets[t+1]);
+            while (!curr.neighbors.contains(next)){
+                offsets[t] += 1;
+                if (mddNodes[t].size() == offsets[t])  offsets[t] = 0;
+                curr = mddNodes[t].get(offsets[t]);
+            }
+        }
+        // return path
+        int[] nextPath = new int[cost+1];
+        for (int i = 0; i < cost; i++)
+            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
+        nextPath[cost] = goal.id;
+
+//        // optional print
+//        ArrayList<String> stringPath = new ArrayList<>();
+//        for (Integer i : nextPath) stringPath.add(i.toString());
+//        print(String.join(" ",stringPath));
+
+        return nextPath;
+    }
+
+//    // ordered
+//    public int[] getNextPath(){
+//        gotFirstPath = false;
+//        if (firstPathEver){
+//            // to handle getting a path for the first time
+//            firstPathEver = false;
+//            gotFirstPath = true;
+//            checkLegalPath(1);
+//        }
+//        else findNextPath(offsets.length-1);
+//        int[] nextPath = new int[cost+1];
+//        for (int i = 0; i < cost; i++)
+//            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
+//        nextPath[cost] = goal.id;
+//
+//        ArrayList<String> stringPath = new ArrayList<>();
+//        for (Integer i : nextPath) stringPath.add(i.toString());
+//        print(String.join(" ",stringPath));
+//        if (gotFirstPath) print("gotFirstPath");
+//
+//        return nextPath;
+//    }
+
+    private void checkLegalPath(int t) {
+        if (t == offsets.length) return; // on goal node
+        MDDNode curr = mddNodes[t].get(offsets[t]);
+        MDDNode prev = mddNodes[t-1].get(offsets[t-1]);
+        if (!curr.neighbors.contains(prev)){
+            // move to next node in time t
+            if (mddNodes[t].size() == offsets[t]+1){
+                // can happen only one time step after the modified
+                // time step x in findNextPath: no more legal nodes,
+                // so go back and advance in x
+                findNextPath(t);
+                return;
+            }
+            offsets[t]+=1;
+            checkLegalPath(t);
+        }
+        else checkLegalPath(t+1);
+    }
+
+    private void findNextPath(int t){
+        resetOffsets(t+1);
+        if (t == 0){
+            // found all paths! reset everything
+            gotFirstPath = true;
+            checkLegalPath(1);
+            return;
+        }
+        if (mddNodes[t].size() == offsets[t]+1){
+            // found all paths from t, so change offset at t-1
+            findNextPath(t-1);
+        }
+        else{
+            // move to next node in time t
+            offsets[t]+=1;
+            checkLegalPath(t);
+        }
+    }
+
+    private void resetOffsets(int t) {
+        for (int i = t; i < offsets.length; i++){
+            offsets[i] = 0;
+        }
+    }
+
+    private static class MDDComparator implements Comparator<MDD> {
+        @Override
+        public int compare(MDD o1, MDD o2) {
+            return o1.agent.id - o2.agent.id;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return agent.id+","+cost;
     }
 }
