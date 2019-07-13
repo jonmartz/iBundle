@@ -12,6 +12,7 @@ public class MDDNode{
     public LinkedHashSet<MDDNode> neighbors = new LinkedHashSet<>();
     public ArrayList<MDDNode> nextNeighbors = new ArrayList<>(); // for MDD merging
     public MDD mdd; // for MDD merging
+    public boolean pruned = false;
 
     public MDDNode(Node node, int time, MDD mdd){
         this.node = node;

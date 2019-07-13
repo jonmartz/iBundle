@@ -74,37 +74,26 @@ public class MDD {
 
     public static boolean getAllocations(ArrayList<MDD> originalMdds) {
         MDD.print = false;
-
-//        // try with all mdds for an easy solution
-//        return getSubAllocations(mdds);
-
-////        MDD.cancelIfTooLittleAdded = true;
-////        if (getSubAllocations(mdds)) return true;
-////        MDD.cancelIfTooLittleAdded = false;
-//
-        // no easy solution found: go for the hard way :(
         ArrayList<MDD> mdds = cloneMDDs(originalMdds);
         mdds.sort(new MDDComparator());
         System.out.println(mdds.size()+" mdd set: "+getHashString(mdds));
 
-        // check for every pair to prune mdd! :D
+        // If already solved and was found unfeasible
         Boolean subsetFeasible = MDD.checkedMddSubsets.get(getHashString(mdds));
         if (subsetFeasible != null) {
             if (!subsetFeasible) return false;
         }
-//        else {
+
+        // check every pair for pruning :D
         pruneOnCollision = true;
-//        for (int i = 2; i < mdds.size(); i++) { // this is for checking all possible subset sizes
-//        for (int i = 2; i < 3; i++) { // todo: maybe triples too? - NO: pruning rules too complex
-//            System.out.println("    checking subset size "+i);
-        if (!pruneMDDs(mdds, new ArrayList<>(), 2, 0)) {
-            resetAllocations(mdds);
-            System.out.println("        FAIL");
-            return false;
-//            }
-        }
-        pruneOnCollision = false;
+//        if (!pruneMDDs(mdds, new ArrayList<>(), 2, 0)) {
+//            resetAllocations(mdds);
+//            System.out.println("        FAIL");
+//            return false;
 //        }
+//        pruneOnCollision = false;
+
+        // solve whole set of MDDs
         MDD.print = true;
         resetAllocations(mdds);
         System.out.println("checking whole set");
@@ -179,12 +168,19 @@ public class MDD {
 
         openStack.add(startState);
         while (!openStack.isEmpty()){
-            if (cancelIfTooLittleAdded && littleAdded > 100){
-                littleAdded = 0;
-                System.out.println("too little added");
-                return false;
-            }
             MergedState currState = openStack.remove();
+
+            // May have a pointer to a node that was already pruned
+            boolean pruned = false;
+            for (MDDNode mddNode : currState.mddNodes) {
+                if (mddNode.pruned) {
+                    System.out.println("        ALREADY PRUNED!");
+                    pruned = true;
+                    break;
+                }
+            }
+            if (pruned) continue;
+
             print("mdd = " + currState.toString()+""); //todo: print anyway sometimes
             if (currState.time == goalTime) {
                 assignAllocations(mdds, currState);
@@ -195,7 +191,8 @@ public class MDD {
                 continue;
             }
             visited.add(currState.id);
-            if (!pruneOnCollision && hasCollision(mdds, currState)) continue;
+//            if (!pruneOnCollision && findCollision(mdds, currState)) continue;
+            if (pruneOnCollision && findCollision(mdds, currState)) continue; // todo: go back to commented if
 
             neighsAdded = 0;
             neighsVisited = 0;
@@ -218,15 +215,17 @@ public class MDD {
             }
             MergedState neighbor = new MergedState(currentState.time+1, currentState, offsets, mdds);
             if (!visited.contains(neighbor.id)){
-                if (!pruneOnCollision || !hasCollision(mdds, neighbor)) {
+//                if (!pruneOnCollision || !findCollision(mdds, neighbor)) {
+                if (pruneOnCollision || !findCollision(mdds, neighbor)) { // todo: go back to commented ifs
                 openStack.add(neighbor);
                 neighsAdded++;
                 }
             }
             else{
                 neighsVisited++;
-                // check for collision in case of BFS
-                if (pruneOnCollision) hasCollision(mdds, neighbor);
+                // check for collision in case of BFS, because there may be a swap collision with neighbor
+//                if (pruneOnCollision) findCollision(mdds, neighbor);
+                if (!pruneOnCollision) findCollision(mdds, neighbor);
             }
             return;
         }
@@ -251,7 +250,7 @@ public class MDD {
         }
     }
 
-    private static boolean hasCollision(ArrayList<MDD> mdds, MergedState currState) {
+    private static boolean findCollision(ArrayList<MDD> mdds, MergedState currState) {
         HashMap<Integer, Integer> nodeIDs = new HashMap<>();
         // check for same position collision
         for (int i = 0; i < mdds.size(); i++){
@@ -318,11 +317,13 @@ public class MDD {
                                     break;
                                 }
                             }
+                            // weird case: node was already pruned
+                            if (prevNode == null) return true;
+                            // case 1: if curr is only next of prev, prune prev
                             if (prevNode.nextNeighbors.size() == 1)
-                                // case 1: if curr is only next of prev, prune prev
                                 recursivePruning(prevNode);
+                            // case 2: if prev is only prev of curr, prune curr
                             else if (currNode.neighbors.size() - currNode.nextNeighbors.size() == 1)
-                                // case 1: if prev is only prev of curr, prune curr
                                 recursivePruning(currNode);
                         }
                     }
@@ -336,6 +337,7 @@ public class MDD {
 
     private static void recursivePruning(MDDNode node) {
         System.out.println("            PRUNE!");
+        node.pruned = true;
         ArrayList<MDDNode> siblings = node.mdd.getTime(node.time);
         ArrayList<MDDNode> prevs = node.mdd.getTime(node.time-1);
         siblings.remove(node);
