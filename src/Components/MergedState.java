@@ -6,15 +6,20 @@ import java.util.Objects;
 
 public class MergedState {
     public int time;
-    public int[] offsets;
+    public MDDNode[] mddNodes;
     public String id;
-    public MergedState prev = null;
+    public MergedState prev;
 
-    public MergedState(int time, int[] offsets) {
+    public MergedState(int time, MergedState prev, int[] offsets, ArrayList<MDD> mdds) {
         this.time = time;
-        this.offsets = offsets;
+        this.prev = prev;
+        mddNodes = new MDDNode[offsets.length];
         ArrayList<String> strings = new ArrayList<>();
-        for (Integer i : offsets) strings.add(String.valueOf(i));
+        for (int i = 0; i < offsets.length; i++) {
+            MDDNode mddNode = mdds.get(i).getTime(time).get(offsets[i]);
+            mddNodes[i] = mddNode;
+            strings.add(String.valueOf(mddNode.node.id));
+        }
         this.id = time+":"+String.join(" ", strings);
     }
 

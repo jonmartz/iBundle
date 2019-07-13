@@ -9,10 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.*;
 
 public class Main extends Application {
@@ -30,76 +27,55 @@ public class Main extends Application {
         boolean launchGUI = true;
 
 //        String[] mapNames = {"den502d", "ost003d", "brc202d"};
-//        String[] mapNames = {"ost003d", "brc202d"};
-        String[] mapNames = {"ost003d"};
-//        int[] agentCounts = {5, 10, 15};
-        int[] agentCounts = {15};
+        String[] mapNames = {"den502d"};
+//        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
+        int[] agentCounts = {20};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
             for (String mapName : mapNames) {
+                boolean once = true;
                 iteration = 0;
                 MDD.resetCheckedSubsets();
                 String mapPath = "./Resources/"+mapName+".map";
-                // create graph from map
                 GridGraph graph = new GridGraph(mapPath);
-                ArrayList<Agent> agents = new ArrayList<>();
 
-//                // 1) random start and goals
-//                HashSet<GridNode> startAndGoalNodes = new HashSet<>();
-//                GridNode node;
-//                for (int i = 0; i < agentCount * 2; i++) {
-//                    node = (GridNode) graph.getRandomNode();
-//                    while (startAndGoalNodes.contains(node))
-//                        node = (GridNode) graph.getRandomNode();
-//                    startAndGoalNodes.add(node);
-//                }
-//                int j = 0;
-//                GridNode startNode = null;
-//                for (GridNode gridNode : startAndGoalNodes) {
-//                    if (j % 2 == 0) startNode = gridNode;
-//                    else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
-//                    j++;
-//                }
-
-                // 4) from instance
-                File file = new File("./Resources/instances/"+mapName+"-"+agentCount+"-0");
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] s = line.trim().split(",");
-                    int startX = Integer.parseInt(s[4]);
-                    int startY = Integer.parseInt(s[3]);
-                    int goalX = Integer.parseInt(s[2]);
-                    int goalY = Integer.parseInt(s[1]);
-                    agents.add(new Agent(startX, startY, goalX, goalY, new BFSearcher(), mapPath));
-                }
-
-//                // 3) manual
-//                agents.add(new Agent(1, 0, 3, 4, new BFSearcher(), mapPath));
-//                agents.add(new Agent(0, 2, 2, 2, new BFSearcher(), mapPath));
+                // --- Choose start and goal allocation method ---
+//                ArrayList<Agent> agents = randomStartAndGoal(graph, mapPath, agentCount);;
+                ArrayList<Agent> agents = instanceStartAndGoal(mapName, mapPath, agentCount);
+//                ArrayList<Agent> agents = manualStartAndGoal(mapPath);
 
                 // create auction
                 Auction auction = new Auction(1, new WinnerDeterminator());
-                System.out.println("*****************");
+                System.out.println("\n*****************");
                 System.out.println("map: " + mapName+", agents: "+agentCount);
 
                 // run
                 long startTime = System.currentTimeMillis();
                 while (!auction.finished) {
                     iteration++;
-                    System.out.println("------------");
-                    System.out.println("iteration " + iteration);
 
                     // STAGE 1 - bidding
+
+                    int cost = 0; // for printing something
                     for (Agent agent : agents) {
-                        if (agent.allocation == null)
-                            auction.addBid(agent.getNextBid());
+                        if (agent.allocation == null) {
+                            Bid bid = agent.getNextBid();
+                            cost += bid.mdd.cost;
+                            auction.addBid(bid);
+                        }
                         else {
 //                            printAgentPath(agent);
                             agent.allocation = null;
                         }
                     }
+                    if (once) {
+                        once = false;
+                        System.out.println("relaxed problem cost = " + cost);
+                    }
+
+                    System.out.println("------------");
+                    System.out.println("iteration " + iteration);
 
                     // STAGE 2 - winner determination
                     auction.determineWinners();
@@ -108,15 +84,11 @@ public class Main extends Application {
                     auction.updatePrices();
                 }
                 long runtime = System.currentTimeMillis() - startTime;
-
                 int sumOfCosts = 0;
-//                System.out.println("The conclusion:");
                 for(Agent agent : agents)
                 {
                     sumOfCosts += agent.allocation.length-1;
-//                    printAgentPath(agent);
                 }
-//                System.out.println("*****************");
                 System.out.println("finished! runtime="+runtime+"ms, cost="+sumOfCosts);
                 List<String> row = new ArrayList<>();
                 row.add(String.valueOf(agentCount));
@@ -158,17 +130,50 @@ public class Main extends Application {
 
     }
 
-    public static void printAgentPath(Agent agent)
-    {
-        String pathInString = "";
-        int [] path = agent.allocation;
+    private ArrayList<Agent> manualStartAndGoal(String mapPath) {
+        ArrayList<Agent> agents = new ArrayList<>();
+        agents.add(new Agent(1, 0, 3, 4, new BFSearcher(), mapPath));
+        agents.add(new Agent(0, 2, 2, 2, new BFSearcher(), mapPath));
+        return agents;
+    }
 
-        pathInString += agent.allocation[0];
-        for(int i=1;i<path.length;i++)
-        {
-            pathInString += ","+agent.allocation[i];
+    private ArrayList<Agent> randomStartAndGoal(GridGraph graph, String mapPath, Integer agentCount) {
+        ArrayList<Agent> agents = new ArrayList<>();
+        HashSet<GridNode> startAndGoalNodes = new HashSet<>();
+        GridNode node;
+        for (int i = 0; i < agentCount * 2; i++) {
+            node = (GridNode) graph.getRandomNode();
+            while (startAndGoalNodes.contains(node))
+                node = (GridNode) graph.getRandomNode();
+            startAndGoalNodes.add(node);
         }
+        int j = 0;
+        GridNode startNode = null;
+        for (GridNode gridNode : startAndGoalNodes) {
+            if (j % 2 == 0) startNode = gridNode;
+            else agents.add(new Agent(startNode.x, startNode.y, gridNode.x, gridNode.y, new BFSearcher(), mapPath));
+            j++;
+        }
+        return agents;
+    }
 
-        System.out.println("Agent "+agent.id+" path: "+pathInString);
+    private ArrayList<Agent> instanceStartAndGoal(String mapName, String mapPath, int agentCount){
+        ArrayList<Agent> agents = new ArrayList<>();
+        try {
+            File file = new File("./Resources/instances/"+mapName+"-"+agentCount+"-0");
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] s = line.trim().split(",");
+                int startX = Integer.parseInt(s[4]);
+                int startY = Integer.parseInt(s[3]);
+                int goalX = Integer.parseInt(s[2]);
+                int goalY = Integer.parseInt(s[1]);
+                agents.add(new Agent(startX, startY, goalX, goalY, new BFSearcher(), mapPath));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return agents;
     }
 }

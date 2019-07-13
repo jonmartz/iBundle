@@ -19,6 +19,17 @@ public class MDDNode{
         this.mdd = mdd;
     }
 
+    /**
+     * Copy constructor
+     * @param mddNode to copy
+     */
+    public MDDNode(MDDNode mddNode, MDD mdd) {
+        this.node = mddNode.node;
+        this.time = mddNode.time;
+        this.offset = mddNode.offset;
+        this.mdd = mdd;
+    }
+
     public void addNeighbor(MDDNode neighbor){
         neighbors.add(neighbor);
         neighbor.neighbors.add(this);
