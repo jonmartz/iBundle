@@ -16,6 +16,7 @@ public class Main extends Application {
 
     public static int iteration;
     public static Controller controller;
+    public static boolean launchGUI = false;
 
     public static void main(String[] args) {
         launch(args);
@@ -24,39 +25,44 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-        boolean launchGUI = true;
+//        launchGUI = true;
+//        MDD.skipCollisionChecking = true;
+//        MDD.print = true;
 
 //        String[] mapNames = {"den502d", "ost003d", "brc202d"};
-        String[] mapNames = {"den502d"};
+        String[] mapNames = {"ost003d"};
 //        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
         int[] agentCounts = {20};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
             for (String mapName : mapNames) {
-                boolean once = true;
+
                 iteration = 0;
-                MDD.resetCheckedSubsets();
                 String mapPath = "./Resources/"+mapName+".map";
                 GridGraph graph = new GridGraph(mapPath);
 
                 // --- Choose start and goal allocation method ---
-//                ArrayList<Agent> agents = randomStartAndGoal(graph, mapPath, agentCount);;
+//                ArrayList<Agent> agents = randomStartAndGoal(graph, mapPath, agentCount);
+                Agent.nextID = 1;
                 ArrayList<Agent> agents = instanceStartAndGoal(mapName, mapPath, agentCount);
 //                ArrayList<Agent> agents = manualStartAndGoal(mapPath);
 
                 // create auction
                 Auction auction = new Auction(1, new WinnerDeterminator());
-                System.out.println("\n*****************");
-                System.out.println("map: " + mapName+", agents: "+agentCount);
+                System.out.println("\n------------------------");
+                System.out.println("agents: " + agentCount+", map: "+mapName);
 
                 // run
+                MDD.resetIncompatibleMddsSet();
+                boolean once = true;
                 long startTime = System.currentTimeMillis();
+                long currTime;
                 while (!auction.finished) {
                     iteration++;
 
                     // STAGE 1 - bidding
-
+                    currTime = System.currentTimeMillis();
                     int cost = 0; // for printing something
                     for (Agent agent : agents) {
                         if (agent.allocation == null) {
@@ -65,20 +71,23 @@ public class Main extends Application {
                             auction.addBid(bid);
                         }
                         else {
-//                            printAgentPath(agent);
                             agent.allocation = null;
                         }
                     }
                     if (once) {
                         once = false;
-                        System.out.println("relaxed problem cost = " + cost);
+                        System.out.println("relaxed cost: " + cost);
+                        System.out.println("------------------------");
                     }
+                    System.out.println("iteration " + iteration+":");
 
-                    System.out.println("------------");
-                    System.out.println("iteration " + iteration);
+                    System.out.println("    single agent search: "+(System.currentTimeMillis()-currTime)+"msec");
 
                     // STAGE 2 - winner determination
+                    currTime = System.currentTimeMillis();
                     auction.determineWinners();
+                    System.out.println("    merged agent search: "+(System.currentTimeMillis()-currTime)+"msec");
+                    if (auction.finished) break; // skip stage 3
 
                     // STAGE 3 - price update
                     auction.updatePrices();
@@ -89,7 +98,7 @@ public class Main extends Application {
                 {
                     sumOfCosts += agent.allocation.length-1;
                 }
-                System.out.println("finished! runtime="+runtime+"ms, cost="+sumOfCosts);
+                System.out.println("FINISHED! runtime="+runtime+"ms, cost="+sumOfCosts);
                 List<String> row = new ArrayList<>();
                 row.add(String.valueOf(agentCount));
                 row.add(mapName);

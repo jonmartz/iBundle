@@ -1,8 +1,6 @@
 package Components;
 
-import Main.Main;
 import Searchers.ISearcher;
-import jdk.nashorn.internal.objects.Global;
 
 import java.util.*;
 
@@ -14,7 +12,7 @@ public class Agent {
     public ISearcher searcher;
     public GridGraph graph;
     public int id;
-    public static int counter=1;
+    public static int nextID =1;
 //    public int i = 0;
 
     public Agent(int startX, int startY, int goalX, int goalY, ISearcher searcher, String graphPath) {
@@ -28,8 +26,8 @@ public class Agent {
 //        this.start = originalNodeToCopyNodeMap.get(start);
 //        this.goal = originalNodeToCopyNodeMap.get(goal);
 
-        this.id = counter;
-        counter++;
+        this.id = nextID;
+        nextID++;
 
     }
 

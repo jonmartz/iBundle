@@ -31,11 +31,15 @@ public class Controller{
     private int agentCount = 0;
     private Color[] colors = {
             Color.RED,
-            Color.GREEN,
-            Color.BLUE,
-            Color.YELLOW,
+            Color.DARKRED,
             Color.ORANGE,
-            Color.PURPLE
+            Color.DARKORANGE,
+            Color.GOLDENROD,
+            Color.DARKGOLDENROD,
+            Color.GREEN,
+            Color.DARKGREEN,
+            Color.BLUE,
+            Color.DARKBLUE
     };
     private double cellWidth;
     private double cellHeight;
