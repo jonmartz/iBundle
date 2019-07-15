@@ -28,9 +28,10 @@ public class Main extends Application {
 //        launchGUI = true;
 //        MDD.skipCollisionChecking = true;
 //        MDD.print = true;
+        MDD.timeoutSeconds = 100000000;
 
 //        String[] mapNames = {"den502d", "ost003d", "brc202d"};
-        String[] mapNames = {"ost003d"};
+        String[] mapNames = {"brc202d"};
 //        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
         int[] agentCounts = {20};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
@@ -56,7 +57,7 @@ public class Main extends Application {
                 // run
                 MDD.resetIncompatibleMddsSet();
                 boolean once = true;
-                long startTime = System.currentTimeMillis();
+                MDD.startTime = System.currentTimeMillis();
                 long currTime;
                 while (!auction.finished) {
                     iteration++;
@@ -86,24 +87,39 @@ public class Main extends Application {
                     // STAGE 2 - winner determination
                     currTime = System.currentTimeMillis();
                     auction.determineWinners();
+                    if (MDD.failed) break;
+
                     System.out.println("    merged agent search: "+(System.currentTimeMillis()-currTime)+"msec");
                     if (auction.finished) break; // skip stage 3
 
                     // STAGE 3 - price update
                     auction.updatePrices();
                 }
-                long runtime = System.currentTimeMillis() - startTime;
+
+                long runtime = System.currentTimeMillis() - MDD.startTime;
                 int sumOfCosts = 0;
-                for(Agent agent : agents)
-                {
-                    sumOfCosts += agent.allocation.length-1;
+
+                if (!MDD.failed){
+                    System.out.println("FINISHED! runtime="+runtime+"ms, cost="+sumOfCosts);
+                    for(Agent agent : agents)
+                    {
+                        sumOfCosts += agent.allocation.length-1;
+                    }
                 }
-                System.out.println("FINISHED! runtime="+runtime+"ms, cost="+sumOfCosts);
                 List<String> row = new ArrayList<>();
                 row.add(String.valueOf(agentCount));
                 row.add(mapName);
-                row.add(String.valueOf(runtime));
-                row.add(String.valueOf(sumOfCosts));
+                if (!MDD.failed) {
+                    row.add(String.valueOf(runtime));
+                    row.add(String.valueOf(sumOfCosts));
+                }
+                else {
+                    MDD.failed = false;
+                    System.out.println("FAIL - "+MDD.timeoutSeconds+" seconds timeout");
+                    row.add("TIMEOUT");
+                    row.add("INFINITE");
+                    continue;
+                }
 
                 rows.add(row);
 
@@ -122,6 +138,8 @@ public class Main extends Application {
                 }
             }
         }
+
+        System.out.println("\nEND");
 
         FileWriter csvWriter = new FileWriter("iBundleResults.csv");
         csvWriter.append("Num Of Agents,");

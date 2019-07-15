@@ -5,10 +5,13 @@ import java.util.*;
 public class MDD {
     // static variables for the super fun low level search
     public static boolean print = false;
+    public static long startTime;
     private static ArrayList<MDDNode> nodeBackup;
     private static boolean unsolvable = false;
     public static boolean skipCollisionChecking = false;
     public static HashMap<MDD, HashSet<MDD>> incompatibleMddsSet;
+    public static boolean failed = false;
+    public static long timeoutSeconds = 1;
 
     // normal members
     public int cost;
@@ -108,6 +111,9 @@ public class MDD {
      */
     public static boolean lowLevelSearch(ArrayList<MDD> mdds) {
 //        System.out.println("pair: "+mdds.get(0).agent.id+" "+mdds.get(1).agent.id);
+
+        if (timeout()) return false;
+
         print("low level search, mdds = "+mdds.size());
         if (mdds.size() == 1){
             mdds.get(0).agent.allocation = mdds.get(0).getNextPath();
@@ -132,7 +138,16 @@ public class MDD {
         print("max cost = " + goalTime);
 
         openStack.addFirst(startState);
+        int iterations = 0;
         while (!openStack.isEmpty()){
+
+            // to stop in case it takes too long to solve
+            iterations++;
+            if (iterations == 1000){
+                iterations = 0;
+                if (timeout()) return false;
+            }
+
             MergedState currState = openStack.removeFirst();
             print("mdd = " + currState.toString()+""); //todo: print anyway sometimes
             if (currState.time == goalTime) {
@@ -164,6 +179,14 @@ public class MDD {
                 unsolvable = false;
                 return false;
             }
+        }
+        return false;
+    }
+
+    private static boolean timeout() {
+        if (System.currentTimeMillis()-startTime > timeoutSeconds*1000){ // more than two minutes...
+            failed = true;
+            return true;
         }
         return false;
     }

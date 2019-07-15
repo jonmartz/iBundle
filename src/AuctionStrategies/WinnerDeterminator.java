@@ -29,9 +29,13 @@ public class WinnerDeterminator implements IAuctionStrategy {
         for (Agent agent : agents) maximalRevenue += agent.bids.size() - 1;
         for (int targetRevenue = maximalRevenue; targetRevenue >= 0; targetRevenue--) {
             System.out.println("    trying revenue: " + targetRevenue);
+            if (targetRevenue == 2){
+                System.out.println("breakpoint");
+            }
             for (int agentCount = agents.size(); agentCount >= 0; agentCount--)
                 if (allocateToAgentSubset(agents, new ArrayList<>(), agentCount, 0, targetRevenue))
                     return;
+                else if (MDD.failed) return;
         }
     }
 
@@ -50,6 +54,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             ArrayList<Agent> agentSubsetClone = new ArrayList<>(agentSubset);
             agentSubsetClone.add(agents.get(i));
             if (allocateToAgentSubset(agents, agentSubsetClone, n-1, i+1, targetRevenue)) return true;
+            else if (MDD.failed) return false;
         }
         return false;
     }
@@ -64,7 +69,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
 //            System.out.println("        target="+String.valueOf(targetRevenue)+"subset="+String.valueOf(subsetRevenue));
 
             if (subsetRevenue < targetRevenue){
-//                System.out.println("        not enough revenue");
+                System.out.println("        not enough revenue");
                 return false;
             }
             return MDD.getAllocations(mdds);
@@ -79,6 +84,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
             }
             if (checkAllMddCombinations(agentSubset, mddSubsetClone, targetRevenue, subsetRevenue+bid.price))
                 return true;
+            else if (MDD.failed) return false;
         }
         return false;
     }
