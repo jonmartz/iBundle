@@ -28,12 +28,12 @@ public class Main extends Application {
 //        launchGUI = true;
 //        MDD.skipCollisionChecking = true;
 //        MDD.print = true;
-        MDD.timeoutSeconds = 100000000;
+        MDD.timeoutSeconds = 30;
 
 //        String[] mapNames = {"den502d", "ost003d", "brc202d"};
-        String[] mapNames = {"brc202d"};
+        String[] mapNames = {"ost003d"};
 //        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
-        int[] agentCounts = {20};
+        int[] agentCounts = {30};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
@@ -66,14 +66,8 @@ public class Main extends Application {
                     currTime = System.currentTimeMillis();
                     int cost = 0; // for printing something
                     for (Agent agent : agents) {
-                        if (agent.allocation == null) {
-                            Bid bid = agent.getNextBid();
-                            cost += bid.mdd.cost;
-                            auction.addBid(bid);
-                        }
-                        else {
-                            agent.allocation = null;
-                        }
+                        if (agent.allocation == null) cost += agent.getNextBid().mdd.cost;
+                        else agent.allocation = null;
                     }
                     if (once) {
                         once = false;
@@ -81,30 +75,29 @@ public class Main extends Application {
                         System.out.println("------------------------");
                     }
                     System.out.println("iteration " + iteration+":");
-
                     System.out.println("    single agent search: "+(System.currentTimeMillis()-currTime)+"msec");
 
                     // STAGE 2 - winner determination
                     currTime = System.currentTimeMillis();
-                    auction.determineWinners();
+                    auction.determineWinners(agents);
                     if (MDD.failed) break;
 
                     System.out.println("    merged agent search: "+(System.currentTimeMillis()-currTime)+"msec");
                     if (auction.finished) break; // skip stage 3
 
                     // STAGE 3 - price update
-                    auction.updatePrices();
+                    auction.updatePrices(agents);
                 }
 
                 long runtime = System.currentTimeMillis() - MDD.startTime;
                 int sumOfCosts = 0;
 
                 if (!MDD.failed){
-                    System.out.println("FINISHED! runtime="+runtime+"ms, cost="+sumOfCosts);
                     for(Agent agent : agents)
                     {
                         sumOfCosts += agent.allocation.length-1;
                     }
+                    System.out.println("FINISHED! runtime="+runtime+"ms, cost="+sumOfCosts);
                 }
                 List<String> row = new ArrayList<>();
                 row.add(String.valueOf(agentCount));
@@ -120,7 +113,7 @@ public class Main extends Application {
                     row.add("INFINITE");
                     continue;
                 }
-
+                row.add(String.valueOf(iteration));
                 rows.add(row);
 
                 if (launchGUI) {
@@ -145,7 +138,8 @@ public class Main extends Application {
         csvWriter.append("Num Of Agents,");
         csvWriter.append("Map Name,");
         csvWriter.append("iBundle Runtime,");
-        csvWriter.append("iBundle Solution Cost\n");
+        csvWriter.append("iBundle Solution Cost,");
+        csvWriter.append("iterations\n");
 
         for (List<String> rowData : rows) {
             csvWriter.append(String.join(",", rowData));

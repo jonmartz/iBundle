@@ -9,7 +9,6 @@ import java.util.*;
  */
 public class Auction {
     public int epsilon;//The additional cost added in each round by the Auctioneer (by default 1)
-    public HashMap<Agent,Set<Bid>> bids = new HashMap<>();//The bids made
     public IAuctionStrategy strategy;//The auction strategy
     public boolean finished = false;//Is the auction finished
 
@@ -24,52 +23,19 @@ public class Auction {
     }
 
     /**
-     * The constructor
-     * epsilon - The additional cost added in every iteration (set to 1)
-     * @param strategy - The Auction strategy
-     */
-    public Auction(IAuctionStrategy strategy) {
-        this(1,strategy);
-    }
-    /**
      * Determine the winners of the current bidding and set their allocations
      */
-    public void determineWinners(){
-        finished = strategy.determineWinners(bids);
+    public void determineWinners(ArrayList<Agent> agents){
+        finished = strategy.determineWinners(agents);
     }
 
     /**
      * update the prices of bids from losers
      */
-    public void updatePrices(){
-        Collection<Agent> agents = this.bids.keySet();
+    public void updatePrices(ArrayList<Agent> agents){
         for(Agent agent : agents)
-        {
-            if (agent.allocation == null){
-                Collection<Bid> bids = this.bids.get(agent);
-                for (Bid bid : bids){
+            if (agent.allocation == null)
+                for (Bid bid : agent.bids)
                     bid.price += epsilon;
-                }
-            }
-        }
-
-    }
-
-    /**
-     * This function will add a bid to the auction
-     * @param bid - The given bid
-     */
-    public void addBid(Bid bid){
-        Set<Bid> bidHistory;
-        if(!bids.containsKey(bid.agent))
-        {
-            bidHistory = new HashSet<>();
-            this.bids.put(bid.agent,bidHistory);
-        }
-        else
-        {
-            bidHistory = bids.get(bid.agent);
-        }
-        bidHistory.add(bid);
     }
 }

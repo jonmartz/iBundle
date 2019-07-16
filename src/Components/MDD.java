@@ -83,27 +83,6 @@ public class MDD {
         return String.join(" ",strings);
     }
 
-//    public static boolean pruneMDDs(ArrayList<MDD> mdds, ArrayList<MDD> mddSubset, int n, int offset){
-//        Boolean subsetFeasible = null;
-//        if (mddSubset.size() >= 2){
-//            subsetFeasible = MDD.checkedMddSubsets.get(getHashString(mddSubset));
-//            if (subsetFeasible != null && !subsetFeasible) return false;
-//        }
-//        if (n == 0){
-//            if (subsetFeasible != null) return subsetFeasible;
-//            subsetFeasible = getSubAllocations(mddSubset, new BFSStateComparator());
-//            MDD.checkedMddSubsets.put(getHashString(mddSubset), subsetFeasible);
-//            return subsetFeasible;
-//        }
-//        for (int i = offset; i < mdds.size(); i++){
-//            ArrayList<MDD> mddSubsetClone = new ArrayList<>(mddSubset);
-//            mddSubsetClone.add(mdds.get(i));
-//            if (!pruneMDDs(mdds, mddSubsetClone, n-1, i+1)) return false;
-//        }
-//        return true;
-//    }
-
-
     /**
      * Merge all the MDDs in agentMDDMap to look for collisions.
      * @param mdds to allccate
@@ -149,7 +128,7 @@ public class MDD {
             }
 
             MergedState currState = openStack.removeFirst();
-            print("mdd = " + currState.toString()+""); //todo: print anyway sometimes
+            print("mdd = " + currState.toString()+"");
             if (currState.time == goalTime) {
                 assignAllocations(mdds, currState);
                 return true;
@@ -548,7 +527,7 @@ public class MDD {
         }
     }
 
-    private static class MDDComparator implements Comparator<MDD> {
+    public static class MDDComparator implements Comparator<MDD> {
         @Override
         public int compare(MDD o1, MDD o2) {
             return o1.agent.id - o2.agent.id;

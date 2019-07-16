@@ -11,8 +11,7 @@ public interface IAuctionStrategy {
 
     /**
      * Determine the winners of the current bidding and set allocation for winner agents.
-     * @param bids to choose from
      * @return true if auction is to be ended, false otherwise.
      */
-    boolean determineWinners(HashMap<Agent,Set<Bid>> bids);
+    boolean determineWinners(ArrayList<Agent> agents);
 }
