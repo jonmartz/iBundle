@@ -3,6 +3,7 @@ package AuctionStrategies;
 import Components.Agent;
 import Components.Bid;
 import Components.MDD;
+import javafx.beans.property.BooleanProperty;
 
 import java.util.*;
 
@@ -36,7 +37,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
         for (int reduction = 0; reduction < maximalRevenue+1; reduction++){
             if (checkAllReductionCombinations(new int[reduction], 0, remainingReductions))
                 return;
-            else if (MDD.failed) return;
+            else if (MDD.timeout) return;
         }
 
 //        for (int targetRevenue = maximalRevenue; targetRevenue >= 0; targetRevenue--) {
@@ -71,6 +72,7 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 // reduction was possible, so advance base recursively
                 boolean result = checkAllReductionCombinations(reductionOffsets, baseIndex+1, remainingReductionsClone);
                 if (result) return true;
+                else if (MDD.timeout) return false;
             }
         }
         return false;
@@ -83,8 +85,13 @@ public class WinnerDeterminator implements IAuctionStrategy {
             if (bid.price == 0) eliminableMdds.add(bid.mdd);
             else constantMdds.add(bid.mdd);
         constantMdds.sort(new MDD.MDDComparator());
-        if (MDD.isSetIncompatible(constantMdds)) return false;
-        for (int eliminationCount = 0; eliminationCount < eliminableMdds.size() + 1; eliminationCount++){
+        if (MDD.isSetIncompatible(constantMdds, null)) return false;
+        return recursiveElimination(constantMdds, eliminableMdds, 0);
+    }
+
+    private boolean recursiveElimination(ArrayList<MDD> constantMdds, ArrayList<MDD> eliminableMdds, int initialCount) {
+        if (initialCount < 0) return false;
+        for (int eliminationCount = initialCount; eliminationCount < eliminableMdds.size() + 1; eliminationCount++){
             boolean[] eliminations = new boolean[eliminableMdds.size()];
             for (int i = 0; i < eliminationCount; i++) eliminations[i] = true;
             boolean ended = false;
@@ -92,8 +99,23 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 ArrayList<MDD> mdds = new ArrayList<>(constantMdds);
                 for (int i = 0; i < eliminations.length; i++)
                     if (!eliminations[i]) mdds.add(eliminableMdds.get(i));
-                if (!MDD.isSetIncompatible(mdds) && MDD.getAllocations(mdds))
-                    return true;
+                MDD[] incompatibles = new MDD[2];
+                if (!MDD.isSetIncompatible(mdds, incompatibles)) {
+                    // run low level search
+                    if (MDD.getAllocations(mdds))
+                        return true;
+                    else if (MDD.timeout) return false;
+                }
+                else {
+                    // found two incompatibles: check only combinations that eliminate one of them
+                    ArrayList<MDD> newEliminables = new ArrayList<>();
+                    for (MDD mdd : eliminableMdds) if (mdd != incompatibles[0]) newEliminables.add(mdd);
+                    if (recursiveElimination(constantMdds, newEliminables, eliminationCount-1))
+                        return true;
+                    newEliminables = new ArrayList<>();
+                    for (MDD mdd : eliminableMdds) if (mdd != incompatibles[1]) newEliminables.add(mdd);
+                    return recursiveElimination(constantMdds, newEliminables, eliminationCount-1);
+                }
                 ended = advanceCombination(eliminations);
             }
         }
@@ -101,6 +123,14 @@ public class WinnerDeterminator implements IAuctionStrategy {
     }
 
     private boolean advanceCombination(boolean[] eliminations) {
+
+//        StringBuilder s = new StringBuilder();
+//        for (Boolean b : eliminations){
+//            if (b) s.append("0 ");
+//            else s.append("- ");
+//        }
+//        System.out.println(s.toString());
+
         boolean gotFalse = false;
         boolean ended = true;
         int truths = 0;

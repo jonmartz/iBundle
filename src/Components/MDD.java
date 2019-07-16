@@ -1,5 +1,7 @@
 package Components;
 
+import Main.Main;
+
 import java.util.*;
 
 public class MDD {
@@ -10,7 +12,7 @@ public class MDD {
     private static boolean unsolvable = false;
     public static boolean skipCollisionChecking = false;
     public static HashMap<MDD, HashSet<MDD>> incompatibleMddsSet;
-    public static boolean failed = false;
+    public static boolean timeout = false;
     public static long timeoutSeconds = 1;
 
     // normal members
@@ -164,7 +166,7 @@ public class MDD {
 
     private static boolean timeout() {
         if (System.currentTimeMillis()-startTime > timeoutSeconds*1000){ // more than two minutes...
-            failed = true;
+            timeout = true;
             return true;
         }
         return false;
@@ -342,14 +344,33 @@ public class MDD {
         incompatibles.add(mdd2);
     }
 
-    public static boolean isSetIncompatible(ArrayList<MDD> mdds) {
+//    public static boolean isSetIncompatible(ArrayList<MDD> mdds) {
+//        for (int i = 0; i < mdds.size()-1; i++){
+//            MDD mdd = mdds.get(i);
+//            HashSet<MDD> incompatibles = incompatibleMddsSet.get(mdd);
+//            if (incompatibles == null) continue;
+//            for (int j = i + 1; j < mdds.size(); j++){
+//                if (incompatibles.contains(mdds.get(j)))
+//                    return true;
+//            }
+//        }
+//        return false;
+//    }
+
+    public static boolean isSetIncompatible(ArrayList<MDD> mdds, MDD[] incompatiblePair) {
         for (int i = 0; i < mdds.size()-1; i++){
-            MDD mdd = mdds.get(i);
-            HashSet<MDD> incompatibles = incompatibleMddsSet.get(mdd);
+            MDD mdd1 = mdds.get(i);
+            HashSet<MDD> incompatibles = incompatibleMddsSet.get(mdd1);
             if (incompatibles == null) continue;
             for (int j = i + 1; j < mdds.size(); j++){
-                if (incompatibles.contains(mdds.get(j)))
+                MDD mdd2 = mdds.get(j);
+                if (incompatibles.contains(mdd2)) {
+                    if (incompatiblePair != null) {
+                        incompatiblePair[0] = mdd1;
+                        incompatiblePair[1] = mdd2;
+                    }
                     return true;
+                }
             }
         }
         return false;

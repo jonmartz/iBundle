@@ -25,10 +25,10 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-//        launchGUI = true;
-//        MDD.skipCollisionChecking = true;
+        launchGUI = true;
+        MDD.skipCollisionChecking = true;
 //        MDD.print = true;
-        MDD.timeoutSeconds = 30;
+        MDD.timeoutSeconds = 60;
 
 //        String[] mapNames = {"den502d", "ost003d", "brc202d"};
         String[] mapNames = {"ost003d"};
@@ -80,7 +80,7 @@ public class Main extends Application {
                     // STAGE 2 - winner determination
                     currTime = System.currentTimeMillis();
                     auction.determineWinners(agents);
-                    if (MDD.failed) break;
+                    if (MDD.timeout) break;
 
                     System.out.println("    merged agent search: "+(System.currentTimeMillis()-currTime)+"msec");
                     if (auction.finished) break; // skip stage 3
@@ -92,7 +92,7 @@ public class Main extends Application {
                 long runtime = System.currentTimeMillis() - MDD.startTime;
                 int sumOfCosts = 0;
 
-                if (!MDD.failed){
+                if (!MDD.timeout){
                     for(Agent agent : agents)
                     {
                         sumOfCosts += agent.allocation.length-1;
@@ -102,12 +102,12 @@ public class Main extends Application {
                 List<String> row = new ArrayList<>();
                 row.add(String.valueOf(agentCount));
                 row.add(mapName);
-                if (!MDD.failed) {
+                if (!MDD.timeout) {
                     row.add(String.valueOf(runtime));
                     row.add(String.valueOf(sumOfCosts));
                 }
                 else {
-                    MDD.failed = false;
+                    MDD.timeout = false;
                     System.out.println("FAIL - "+MDD.timeoutSeconds+" seconds timeout");
                     row.add("TIMEOUT");
                     row.add("INFINITE");
