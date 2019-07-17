@@ -14,6 +14,9 @@ import javafx.scene.text.Text;
 
 import java.util.HashMap;
 
+/**
+ * For rendering the GUI. This class is not fully commented.
+ */
 public class Controller{
 
     @FXML

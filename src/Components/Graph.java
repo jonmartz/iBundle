@@ -2,6 +2,9 @@ package Components;
 
 import java.util.*;
 
+/**
+ * Represents a graph
+ */
 public class Graph {
     public ArrayList<Node> nodes = new ArrayList<>();
 
@@ -64,74 +67,77 @@ public class Graph {
         return node.getCopy();
     }
 
-    /**
-     * Get a deep copy of the graph
-     * @param originalNodeToCopyNodeMap map of node copies, gotten from outside so that caller can
-     *                                  retrieve start and goal nodes from it
-     * @return a copy of the graph
-     */
-    public Graph getCopy(HashMap<Node, Node> originalNodeToCopyNodeMap) {
-        Graph graphCopy = getNewGraph();
-        LinkedList<Node[]> nodeQueue = new LinkedList<>();
-        Node[] firstEntry = {nodes.get(0), null};
-        nodeQueue.add(firstEntry);
-        HashSet<Node> nodesAddedToQueue = new HashSet<>();
-        nodesAddedToQueue.add(nodes.get(0));
-        while(iterativeCopy(nodeQueue, graphCopy, originalNodeToCopyNodeMap, nodesAddedToQueue));
-        return graphCopy;
-    }
+//    /**
+//     * Get a deep copy of the graph
+//     * @param originalNodeToCopyNodeMap map of node copies, gotten from outside so that caller can
+//     *                                  retrieve start and goal nodes from it
+//     * @return a copy of the graph
+//     */
+//    public Graph getCopy(HashMap<Node, Node> originalNodeToCopyNodeMap) {
+//        Graph graphCopy = getNewGraph();
+//        LinkedList<Node[]> nodeQueue = new LinkedList<>();
+//        Node[] firstEntry = {nodes.get(0), null};
+//        nodeQueue.add(firstEntry);
+//        HashSet<Node> nodesAddedToQueue = new HashSet<>();
+//        nodesAddedToQueue.add(nodes.get(0));
+//        while(iterativeCopy(nodeQueue, graphCopy, originalNodeToCopyNodeMap, nodesAddedToQueue));
+//        return graphCopy;
+//    }
+
+//    /**
+//     * May need to be overiden in different graphs
+//     * @return clone of graph
+//     */
+//    protected Graph getNewGraph() {
+//        return new Graph();
+//    }
+//
+//    /**
+//     * Copy the graph. If copy has been completed, returns false. Is iterative in order to avoid a stack overflow.
+//     * @param nodeQueue to retrieve node to copy and the prev node copied
+//     * @param graphCopy graph to copy
+//     * @param originalNodeToCopyNodeMap explained before
+//     * @return true to continue, false to end copy
+//     */
+//    private boolean iterativeCopy(LinkedList<Node[]> nodeQueue, Graph graphCopy,
+//                                  HashMap<Node, Node> originalNodeToCopyNodeMap,
+//                                  HashSet<Node> nodesAddedToQueue) {
+//
+//        if (nodeQueue.isEmpty()) return false;
+//
+//        // get nodes from queue
+//        Node[] nodesEntry = nodeQueue.removeFirst();
+//        Node node = nodesEntry[0];
+//        Node prevNode = nodesEntry[1];
+//        Node nodeCopy = node.getCopy(); // will not be null
+//        Node prevNodeCopy = null;
+//        if (prevNode != null) prevNodeCopy = nodesEntry[1].getCopy();
+//        nodesAddedToQueue.remove(node);
+//
+//        // connect nodes
+//        graphCopy.addNode(nodeCopy);
+//        if (prevNodeCopy != null) nodeCopy.addNeighbor(prevNodeCopy);
+//
+//        // to not add a neighbor twice,and be able to have more than one node with same id
+//        originalNodeToCopyNodeMap.put(node, nodeCopy);
+//
+//        for (Node neighbor : node.neighbors){
+//            if (!originalNodeToCopyNodeMap.containsKey(neighbor)){
+//                if (nodesAddedToQueue.contains(neighbor)) continue;
+//                Node[] newEntry = {neighbor, nodeCopy};
+//                nodeQueue.add(newEntry);
+//                nodesAddedToQueue.add(neighbor);
+//            }
+//            else { // make them neighbors anyway!
+//                nodeCopy.addNeighbor(originalNodeToCopyNodeMap.get(neighbor));
+//            }
+//        }
+//        return true;
+//    }
 
     /**
-     * May need to be overiden in different graphs
-     * @return clone of graph
+     * Reset the state of the nodes in the graph, for doing more than one search in the graph
      */
-    protected Graph getNewGraph() {
-        return new Graph();
-    }
-
-    /**
-     * Copy the graph. If copy has been completed, returns false. Is iterative in order to avoid a stack overflow.
-     * @param nodeQueue to retrieve node to copy and the prev node copied
-     * @param graphCopy graph to copy
-     * @param originalNodeToCopyNodeMap explained before
-     * @return true to continue, false to end copy
-     */
-    private boolean iterativeCopy(LinkedList<Node[]> nodeQueue, Graph graphCopy,
-                                  HashMap<Node, Node> originalNodeToCopyNodeMap,
-                                  HashSet<Node> nodesAddedToQueue) {
-
-        if (nodeQueue.isEmpty()) return false;
-
-        // get nodes from queue
-        Node[] nodesEntry = nodeQueue.removeFirst();
-        Node node = nodesEntry[0];
-        Node prevNode = nodesEntry[1];
-        Node nodeCopy = node.getCopy(); // will not be null
-        Node prevNodeCopy = null;
-        if (prevNode != null) prevNodeCopy = nodesEntry[1].getCopy();
-        nodesAddedToQueue.remove(node);
-
-        // connect nodes
-        graphCopy.addNode(nodeCopy);
-        if (prevNodeCopy != null) nodeCopy.addNeighbor(prevNodeCopy);
-
-        // to not add a neighbor twice,and be able to have more than one node with same id
-        originalNodeToCopyNodeMap.put(node, nodeCopy);
-
-        for (Node neighbor : node.neighbors){
-            if (!originalNodeToCopyNodeMap.containsKey(neighbor)){
-                if (nodesAddedToQueue.contains(neighbor)) continue;
-                Node[] newEntry = {neighbor, nodeCopy};
-                nodeQueue.add(newEntry);
-                nodesAddedToQueue.add(neighbor);
-            }
-            else { // make them neighbors anyway!
-                nodeCopy.addNeighbor(originalNodeToCopyNodeMap.get(neighbor));
-            }
-        }
-        return true;
-    }
-
     public void reset() {
         for (Node node : nodes){
             node.visited = false;
@@ -140,6 +146,9 @@ public class Graph {
         }
     }
 
+    /**
+     * Return a random node
+     */
     public Node getRandomNode() {
         Random rand = new Random();
         return nodes.get(rand.nextInt(nodes.size()));

@@ -8,7 +8,7 @@ import javafx.beans.property.BooleanProperty;
 import java.util.*;
 
 /**
- * This class will determine the agents that win an iteration (inspired form ICTS)
+ * This class will determine the agents that win an iteration (inspired from ICTS)
  */
 public class WinnerDeterminator implements IAuctionStrategy {
 
@@ -25,6 +25,9 @@ public class WinnerDeterminator implements IAuctionStrategy {
         return true;
     }
 
+    /**
+     * Give allocations to as many agents as possible
+     */
     private void getAllocations() {
         int maximalRevenue = 0;
         int[] remainingReductions = new int[agents.size()];
@@ -39,16 +42,12 @@ public class WinnerDeterminator implements IAuctionStrategy {
                 return;
             else if (MDD.timeout) return;
         }
-
-//        for (int targetRevenue = maximalRevenue; targetRevenue >= 0; targetRevenue--) {
-//            System.out.println("    trying revenue: " + targetRevenue);
-//            for (int agentCount = agents.size(); agentCount >= 0; agentCount--)
-//                if (allocateToAgentSubset(agents, new ArrayList<>(), agentCount, 0, targetRevenue))
-//                    return;
-//                else if (MDD.failed) return;
-//        }
     }
 
+    /**
+     * Try all the combinations of reducing one or more points to the price of the bundles
+     * @return true if an allocation was found
+     */
     private boolean checkAllReductionCombinations(int[] reductionOffsets, int baseIndex, int[] remainingReductions) {
         if (baseIndex == reductionOffsets.length){
             // got a valid reduction combination
@@ -78,6 +77,10 @@ public class WinnerDeterminator implements IAuctionStrategy {
         return false;
     }
 
+    /**
+     * Check all the possible ways of dropping zero or more bids with that have a price of 0
+     * @return true if an allocation was found
+     */
     private boolean checkAllEliminationCombinations(ArrayList<Bid> bids) {
         ArrayList<MDD> constantMdds = new ArrayList<>();
         ArrayList<MDD> eliminableMdds = new ArrayList<>();
@@ -89,6 +92,10 @@ public class WinnerDeterminator implements IAuctionStrategy {
         return recursiveElimination(constantMdds, eliminableMdds, 0);
     }
 
+    /**
+     * Divide the search in two, to be sure no more allocations that include conflicting pair of bids is checked.
+     * @return true if an allocation was found
+     */
     private boolean recursiveElimination(ArrayList<MDD> constantMdds, ArrayList<MDD> eliminableMdds, int initialCount) {
         if (initialCount < 0) return false;
         for (int eliminationCount = initialCount; eliminationCount < eliminableMdds.size() + 1; eliminationCount++){
@@ -122,14 +129,12 @@ public class WinnerDeterminator implements IAuctionStrategy {
         return false;
     }
 
+    /**
+     * Update the array to indicate the next elimination combination
+     * @param eliminations array to update
+     * @return true if the last possible combination has been reached
+     */
     private boolean advanceCombination(boolean[] eliminations) {
-
-//        StringBuilder s = new StringBuilder();
-//        for (Boolean b : eliminations){
-//            if (b) s.append("0 ");
-//            else s.append("- ");
-//        }
-//        System.out.println(s.toString());
 
         boolean gotFalse = false;
         boolean ended = true;
@@ -156,60 +161,10 @@ public class WinnerDeterminator implements IAuctionStrategy {
         return ended;
     }
 
-//    private boolean allocateToAgentSubset(ArrayList<Agent> agents, ArrayList<Agent> agentSubset,
-//                                                 int n, int offset, int targetRevenue){
-//        if (n == 0){
-//
-//            ArrayList<String> strings = new ArrayList<>();
-//            for (Agent agent : agentSubset) strings.add(String.valueOf(agent.id));
-////            System.out.println("        "+strings.size()+" agents: "+String.join(" ",strings));
-//
-//            // get all mdds from agent subset that give target revenue
-//            return checkAllMddCombinations(agentSubset, new ArrayList<>(), targetRevenue, 0);
-//        }
-//        for (int i = offset; i < agents.size()-n+1; i++){
-//            ArrayList<Agent> agentSubsetClone = new ArrayList<>(agentSubset);
-//            agentSubsetClone.add(agents.get(i));
-//            if (allocateToAgentSubset(agents, agentSubsetClone, n-1, i+1, targetRevenue)) return true;
-//            else if (MDD.failed) return false;
-//        }
-//        return false;
-//    }
-
-//    private boolean checkAllMddCombinations(ArrayList<Agent> agentSubset, ArrayList<MDD> mdds,
-//                                            int targetRevenue, int subsetRevenue) {
-//        if (mdds.size() == agentSubset.size()){
-//
-////            ArrayList<String> strings = new ArrayList<>();
-////            for (MDD mdd : mdds) strings.add(String.valueOf(mdd.cost));
-////            System.out.println("    mdd costs: "+String.join(" ",strings));
-////            System.out.println("        target="+String.valueOf(targetRevenue)+"subset="+String.valueOf(subsetRevenue));
-//
-//            if (subsetRevenue < targetRevenue){
-//                System.out.println("        not enough revenue");
-//                return false;
-//            }
-//            return MDD.getAllocations(mdds);
-//        }
-//        Agent agent = agentSubset.get(mdds.size());
-//        for (Bid bid : agent.bids){
-//            ArrayList<MDD> mddSubsetClone = new ArrayList<>(mdds);
-//            mddSubsetClone.add(bid.mdd);
-//            if (MDD.isSetIncompatible(mddSubsetClone)){
-////                System.out.println("        INCOMPATIBLE");
-//                continue;
-//            }
-//            if (checkAllMddCombinations(agentSubset, mddSubsetClone, targetRevenue, subsetRevenue+bid.price))
-//                return true;
-//            else if (MDD.failed) return false;
-//        }
-//        return false;
-//    }
-
+    /**
+     * Sorts from the agent with the highest highest bid to the one with the lowest highest bid
+     */
     private class AgentComparator implements Comparator<Agent> {
-        /**
-         * Agent with highest price bid first
-         */
         @Override
         public int compare(Agent o1, Agent o2) {
             return o2.bids.size() - o1.bids.size();

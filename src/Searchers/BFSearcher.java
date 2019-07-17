@@ -4,6 +4,9 @@ import Components.Node;
 
 import java.util.LinkedList;
 
+/**
+ * Represents the BFS algorithm, for single agent shortest path search. Find ALL the possible shortest paths.
+ */
 public class BFSearcher extends ASearcher{
 
     private LinkedList<Node> openQueue;

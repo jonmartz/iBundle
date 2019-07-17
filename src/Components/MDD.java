@@ -1,32 +1,41 @@
 package Components;
 
-import Main.Main;
-
 import java.util.*;
 
+/**
+ * Represents an MDD. Also, heavy use of static functions was made in this class to do all the low level search
+ * of the k-Agent MDD space.
+ */
 public class MDD {
     // static variables for the super fun low level search
-    public static boolean print = false;
-    public static long startTime;
-    private static ArrayList<MDDNode> nodeBackup;
-    private static boolean unsolvable = false;
-    public static boolean skipCollisionChecking = false;
-    public static HashMap<MDD, HashSet<MDD>> incompatibleMddsSet;
-    public static boolean timeout = false;
-    public static long timeoutSeconds = 1;
+    public static boolean print = false; // to print in low level search
+    public static long startTime; // to know when timeout is reached
+    private static ArrayList<MDDNode> nodeBackup; // to save here nodes that were pruned and restore them later
+    private static boolean unsolvable = false; // true if an unavoidable collision was found
+    public static boolean ignoreCollisions = false; // to ignore all collisions
+    public static HashMap<MDD, HashSet<MDD>> incompatibleMddsSet; // set of all mdds pairs that are unsolvable
+    public static boolean timeout = false; // true if run was ended because og timeout
+    public static long timeoutSeconds; // seconds to timeout
 
     // normal members
-    public int cost;
-    public HashSet<Node> nodes = new HashSet<>();
-    public ArrayList<MDDNode>[] mddNodes; // array of array lists. mddNodes[i] = all nodes in time i
+    public int cost; // length of the paths in MDD
+    public HashSet<Node> nodes = new HashSet<>(); // set of all actual nodes the MDD contains (not MDD nodes)
+    public ArrayList<MDDNode>[] mddNodes; // array of array lists. mddNodes[i] = list of all nodes in time i
     public Node start;
     public Node goal;
-    public Agent agent;
+    public Agent agent; // owner of the bid that contains the MDD
 
     // for getting a possible path
     private int[] offsets; // to indicate the current path (doesn't include t=cost)
     public boolean gotFirstPath = false;
 
+    /**
+     * Constructor
+     * @param cost of mdd
+     * @param start node
+     * @param goal node
+     * @param agent that owns the bid with the MDD
+     */
     public MDD(int cost, Node start, Node goal, Agent agent) {
         this.cost = cost;
         this.start = start;
@@ -36,34 +45,22 @@ public class MDD {
         this.agent = agent;
     }
 
+    /**
+     * Attempt to allocate a path to all MDDs
+     * @param mdds to allocate
+     * @return true if allocation was found
+     */
     public static boolean getAllocations(ArrayList<MDD> mdds) {
-//        MDD.print = false;
         mdds.sort(new MDDComparator());
-
-        ArrayList<String> strings = new ArrayList<>();
-        for (MDD mdd : mdds) strings.add(String.valueOf(mdd.agent.id));
-//        System.out.println("    "+mdds.size()+" mdd set: "+String.join(" ",strings));
-
-        // If already solved and was found unfeasible
-//        Boolean subsetFeasible = MDD.checkedMddSubsets.get(getHashString(mdds));
-//        if (subsetFeasible != null) {
-//            if (!subsetFeasible) return false;
-//        }
-
-        // check every pair for pruning :D
-//        if (!pruneMDDs(mdds, new ArrayList<>(), 2, 0)) {
-//            resetAllocations(mdds);
-//            System.out.println("        FAIL");
-//            return false;
-//        }
-
         nodeBackup = new ArrayList<>();
         boolean result = lowLevelSearch(mdds);
         restoreMdds();
-//        if (!result) System.out.println("   FAIL");
         return result;
     }
 
+    /**
+     * Restore the mdds to the state they were before the pruning
+     */
     private static void restoreMdds() {
         for (MDDNode node : nodeBackup){
             ArrayList<MDDNode> layer = node.mdd.getTime(node.time);
@@ -75,34 +72,23 @@ public class MDD {
         }
     }
 
-    private static String getHashString(ArrayList<MDD> mdds) {
-        // todo: make a hashSet for incompatible pairs:
-        // Each time an unsolvable conflict between two mdds is found,
-        // add the mdd pair to the hash. In each iteration, before triggering
-        // the low level search, look for each possible pair for conflicts
-        ArrayList<String> strings = new ArrayList<>();
-        for (MDD mdd : mdds) strings.add(mdd.toString());
-        return String.join(" ",strings);
-    }
-
     /**
      * Merge all the MDDs in agentMDDMap to look for collisions.
-     * @param mdds to allccate
+     * @param mdds to allocate
      * @return true if there are paths with no collisions for all agents
      */
     public static boolean lowLevelSearch(ArrayList<MDD> mdds) {
-//        System.out.println("pair: "+mdds.get(0).agent.id+" "+mdds.get(1).agent.id);
-
         if (timeout()) return false;
 
         print("low level search, mdds = "+mdds.size());
+
+        // easy case
         if (mdds.size() == 1){
             mdds.get(0).agent.allocation = mdds.get(0).getNextPath();
             return true;
         }
 
         // If not so lucky:
-//        PriorityQueue<MergedState> openStack = new PriorityQueue<>(stateComparator);
         LinkedList<MergedState> openStack = new LinkedList<>();
         HashSet<String> visited = new HashSet<>();
 
@@ -129,6 +115,7 @@ public class MDD {
                 if (timeout()) return false;
             }
 
+            // retrieve state from open list
             MergedState currState = openStack.removeFirst();
             print("mdd = " + currState.toString()+"");
             if (currState.time == goalTime) {
@@ -137,7 +124,6 @@ public class MDD {
             }
 
             // May have a pointer to a node that was already pruned
-            // todo: maybe useless after implementing iterative neighbor adding
             boolean pruned = false;
             for (MDDNode mddNode : currState.mddNodes) {
                 if (mddNode.pruned) {
@@ -148,15 +134,21 @@ public class MDD {
             }
             if (pruned) continue;
 
+            // check if already visited
             if (visited.contains(currState.id)){
                 print("             visited");
                 continue;
             }
+
+            // add neighbor to open queue. If neighbor is not the last possible neighbor of the state,
+            // the state puts itself back into the open queue to give away more neighbors later.
             MergedState neighbor = currState.getNextNeighbor();
             if (!currState.gotAllPossibleNeighbors) openStack.addFirst(currState);
             else visited.add(currState.id);
+
+            // add neighbor only if it doesn't produce collisions
             if (!hasCollision(mdds, neighbor)) openStack.addFirst(neighbor);
-            if (unsolvable){
+            if (unsolvable){ // if the collision is unavoidable
                 unsolvable = false;
                 return false;
             }
@@ -164,6 +156,10 @@ public class MDD {
         return false;
     }
 
+    /**
+     * Check if timeout has been reached
+     * @return true if timeout reached
+     */
     private static boolean timeout() {
         if (System.currentTimeMillis()-startTime > timeoutSeconds*1000){ // more than two minutes...
             timeout = true;
@@ -172,14 +168,23 @@ public class MDD {
         return false;
     }
 
+    /**
+     * Check if there is a collision in the state. Will also try to prune in case of collision.
+     * In this function will check only for normal collisions, and then try to find swap collisions.
+     * @param mdds of the current run
+     * @param currState to check for collisions
+     * @return true if collision was found
+     */
     private static boolean hasCollision(ArrayList<MDD> mdds, MergedState currState) {
-        if (skipCollisionChecking) return false;
+        if (ignoreCollisions) return false;
         HashMap<Integer, Integer> nodeIDs = new HashMap<>();
+
         // check for same position collision
         for (int i = 0; i < mdds.size(); i++){
             int nodeID = currState.mddNodes[i].node.id;
             if (nodeIDs.containsKey(nodeID)){
                 print("        collision: "+currState.time);
+
                 // attempt pruning
                 int j = nodeIDs.get(nodeID);
                 MDD mdd1 = mdds.get(i);
@@ -188,6 +193,7 @@ public class MDD {
                 ArrayList<MDDNode> mmdNodes2 = mdd2.getTime(currState.time);
                 MDDNode node1 = currState.mddNodes[i];
                 MDDNode node2 = currState.mddNodes[j];
+
                 // prune only if the other mdd has only one choice of being there
                 if (mmdNodes1.size() == 1 && mmdNodes2.size() == 1){
                     addIncompatible(mdd1, mdd2);
@@ -203,6 +209,12 @@ public class MDD {
         return findSwapCollision(mdds, currState);
     }
 
+    /**
+     * Look for swap collisions, and try to prune if possible.
+     * @param mdds of the current run
+     * @param currState to check for collisions
+     * @return true if collision was found
+     */
     private static boolean findSwapCollision(ArrayList<MDD> mdds, MergedState currState) {
         // check for swap position collision
         if (currState.prev != null){
@@ -225,6 +237,7 @@ public class MDD {
                     ArrayList<MDDNode> prevNodes2 = mdd2.getTime(prevState.time);
                     MDDNode currNode1 = currState.mddNodes[i1];
                     MDDNode currNode2 = currState.mddNodes[i2];
+
                     // prune only if the other mdd's only choice is to traverse the collision path
                     MDD mddToPrune = null;
                     MDDNode currNode = null;
@@ -270,9 +283,13 @@ public class MDD {
         return false;
     }
 
+    /**
+     * Pruning is possible! Yay! (May prune parent of node, in case node is the only child of it's parent)
+     * @param node to prune
+     */
     private static void recursivePruning(MDDNode node) {
         if (node.time == 0){
-            System.out.println("    TRIED PRUNING ROOT");
+            print("         TRIED PRUNING ROOT");
             unsolvable = true;
             return;
         }
@@ -294,9 +311,12 @@ public class MDD {
     }
 
     /**
-     * Assign path to each allocation;
+     * Select a path from each MDD and assign it as the mdd's agent's allocation.
+     * The path may include extension (if the mdd was not the mdd with the longest path among all the mdds),
+     * So the extension will be pruned in order to correctly calculate the sum of costs later.
      */
     private static void assignAllocations(ArrayList<MDD> mdds, MergedState currState) {
+
         // Build allocations including extensions
         ArrayList<LinkedList<Integer>> allocations = new ArrayList<>();
         boolean first = true;
@@ -326,10 +346,18 @@ public class MDD {
         }
     }
 
+    /**
+     * Run at the start of a scenario
+     */
     public static void resetIncompatibleMddsSet() {
         incompatibleMddsSet = new HashMap<>();
     }
 
+    /**
+     * Add an incompatible pair of mdds (unavoidable collision) to the list.
+     * Will always add the mdd with smallest agent id as the key and the other mdd is added
+     * to the value of that map entry, which is a list of mdds.
+     */
     private static void addIncompatible(MDD mdd1, MDD mdd2) {
         if (mdd1.agent.id > mdd2.agent.id){
             MDD temp = mdd1;
@@ -344,19 +372,11 @@ public class MDD {
         incompatibles.add(mdd2);
     }
 
-//    public static boolean isSetIncompatible(ArrayList<MDD> mdds) {
-//        for (int i = 0; i < mdds.size()-1; i++){
-//            MDD mdd = mdds.get(i);
-//            HashSet<MDD> incompatibles = incompatibleMddsSet.get(mdd);
-//            if (incompatibles == null) continue;
-//            for (int j = i + 1; j < mdds.size(); j++){
-//                if (incompatibles.contains(mdds.get(j)))
-//                    return true;
-//            }
-//        }
-//        return false;
-//    }
-
+    /**
+     * Will check if the set of mdds contains a pair of mdds that are incompatible
+     * @param incompatiblePair will be modified to point to the conflicting mdd pair, in case there is one
+     * @return true of an incompatible pair was found
+     */
     public static boolean isSetIncompatible(ArrayList<MDD> mdds, MDD[] incompatiblePair) {
         for (int i = 0; i < mdds.size()-1; i++){
             MDD mdd1 = mdds.get(i);
@@ -376,27 +396,21 @@ public class MDD {
         return false;
     }
 
+    /**
+     * Get the MDDNode layer at a certain timestamp
+     * @param time of layer
+     * @return the layer at timestamp time, or if the timestamp is greater than the mdds' largest timestamp,
+     * the last layer (in order to execute the extension needed to search the whole k-mdd search space)
+     */
     public ArrayList<MDDNode> getTime(int time) {
         if (time <= cost) return mddNodes[time];
         return mddNodes[cost];
     }
 
-    private static abstract class StateComparator implements Comparator<MergedState>{}
-
-    private static class DFSStateComparator extends StateComparator {
-        @Override
-        public int compare(MergedState o1, MergedState o2) {
-            return o2.time - o1.time;
-        }
-    }
-
-    private static class BFSStateComparator extends StateComparator{
-        @Override
-        public int compare(MergedState o1, MergedState o2) {
-            return o1.time - o2.time;
-        }
-    }
-
+    /**
+     * Print stuff during the low level search
+     * @param s string to print
+     */
     private static void print(String s){
         if (print) System.out.println(s);
     }
@@ -433,12 +447,15 @@ public class MDD {
         return mddNode;
     }
 
-    // random
+    /**
+     * Get a random legal path from mdd
+     * @return int[] with the ids of all the nodes in the path
+     */
     public int[] getNextPath(){
-        // get random path
         Random rand = new Random();
         boolean first = true;
         int middle = rand.nextInt(offsets.length-1)+1; // don't include first and last layers
+
         // move forward from middle
         for (int t = middle; t < offsets.length; t++){
             offsets[t] = rand.nextInt(mddNodes[t].size());
@@ -472,38 +489,13 @@ public class MDD {
         for (int i = 0; i < cost; i++)
             nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
         nextPath[cost] = goal.id;
-
-//        // optional print
-//        ArrayList<String> stringPath = new ArrayList<>();
-//        for (Integer i : nextPath) stringPath.add(i.toString());
-//        print(String.join(" ",stringPath));
-
         return nextPath;
     }
 
-//    // ordered
-//    public int[] getNextPath(){
-//        gotFirstPath = false;
-//        if (firstPathEver){
-//            // to handle getting a path for the first time
-//            firstPathEver = false;
-//            gotFirstPath = true;
-//            checkLegalPath(1);
-//        }
-//        else findNextPath(offsets.length-1);
-//        int[] nextPath = new int[cost+1];
-//        for (int i = 0; i < cost; i++)
-//            nextPath[i] = mddNodes[i].get(offsets[i]).node.id;
-//        nextPath[cost] = goal.id;
-//
-//        ArrayList<String> stringPath = new ArrayList<>();
-//        for (Integer i : nextPath) stringPath.add(i.toString());
-//        print(String.join(" ",stringPath));
-//        if (gotFirstPath) print("gotFirstPath");
-//
-//        return nextPath;
-//    }
-
+    /**
+     * Check if that is legal (all nodes are actually connected)
+     * @param t timestamp
+     */
     private void checkLegalPath(int t) {
         if (t == offsets.length) return; // on goal node
         MDDNode curr = mddNodes[t].get(offsets[t]);
@@ -523,6 +515,10 @@ public class MDD {
         else checkLegalPath(t+1);
     }
 
+    /**
+     * Find the next path in the mdd
+     * @param t timestamp
+     */
     private void findNextPath(int t){
         resetOffsets(t+1);
         if (t == 0){
@@ -542,12 +538,18 @@ public class MDD {
         }
     }
 
+    /**
+     * For private purposes
+     */
     private void resetOffsets(int t) {
         for (int i = t; i < offsets.length; i++){
             offsets[i] = 0;
         }
     }
 
+    /**
+     * Sorts the mdds from the one with the smallest agent id to the biggest one
+     */
     public static class MDDComparator implements Comparator<MDD> {
         @Override
         public int compare(MDD o1, MDD o2) {

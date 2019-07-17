@@ -6,6 +6,10 @@ import Components.Node;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+/**
+ * Not used, because it did a lot of problems since we need to find ALL the possible shortest paths, and not only one.
+ * So it's not fully commented.
+ */
 public class AStarSearcher extends ASearcher{
 
     public int timeStamp = 0;

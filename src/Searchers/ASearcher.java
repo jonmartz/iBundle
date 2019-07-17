@@ -8,10 +8,13 @@ import Components.Node;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 
+/**
+ * Represents an abstract "First Search" algorithm, which may be BFS or A* (not used)
+ */
 public abstract class ASearcher implements ISearcher {
 
+    // self explanatory
     public Agent agent;
     public Node start;
     public Node goal;
@@ -46,10 +49,19 @@ public abstract class ASearcher implements ISearcher {
         return null;
     }
 
+    /**
+     * Initialize the open list
+     */
     protected abstract void initializeQueue();
 
+    /**
+     * Add node to open list
+     */
     protected abstract void enqueue(Node node);
 
+    /**
+     * Extract a node from open list
+     */
     protected abstract Node dequeue();
 
     protected abstract boolean isQueueEmpty();

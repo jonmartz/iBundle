@@ -5,13 +5,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * Represents a grid graph, like the Dragon Age Origins maps
+ */
 public class GridGraph extends Graph {
 
-    public int[][] intGrid;
-    public GridNode[][] nodeGrid;
+    public int[][] intGrid; // -1 if wall, or if of the node contained by the cell
+    public GridNode[][] nodeGrid; // actual pointers to all nodes
 
     private GridGraph(){}
 
+    /**
+     * Create a grid graph from a .map file
+     * @param mapPath of the .map file
+     */
     public GridGraph(String mapPath) {
         try {
             File file = new File(mapPath);
@@ -53,17 +60,17 @@ public class GridGraph extends Graph {
     }
 
     @Override
-    protected Graph getNewGraph() {
-        return new GridGraph();
-    }
-
-    @Override
     protected Node cloneNode(Node node) {
         GridNode clone = (GridNode) node.getCopy();
         clone.z = clone.z+1;
         return clone;
     }
 
+    /**
+     * Get node with the indicated coordinates
+     * @param x node's column
+     * @param y node's row
+     */
     public Node getNode(int x, int y) {
         return nodeGrid[y][x];
     }

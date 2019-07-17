@@ -17,12 +17,4 @@ public class Bid {
         this.agent = agent;
         this.mdd = mdd;
     }
-
-    /**
-     * This function will return the value of the MDD (plus the additional cost)
-     * @return - The final MDD value
-     */
-    public int getValue() {
-        return mdd.cost + price;
-    }
 }

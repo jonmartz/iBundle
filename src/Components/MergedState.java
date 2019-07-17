@@ -4,15 +4,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Represents a merged MDD state, which is a possible combination of MDDNodes at a certain time, from each mdd involved.
+ */
 public class MergedState {
-    public int time;
-    public MDDNode[] mddNodes;
-    public String id;
-    public MergedState prev;
-    public int[] nextOffsets;
+    public int time; // timestamp
+    public MDDNode[] mddNodes; // contains one MDDNode from every mdd involved in the current low level search
+    public String id; // for hashing purposes
+    public MergedState prev; // prev state
+    public int[] nextOffsets; // for remembering what was the last neighbor returned
     public int[] nextSizes; // for detecting a change in the size of next neighbors - from a pruning
-    public boolean gotAllPossibleNeighbors = false;
+    public boolean gotAllPossibleNeighbors = false; // true if all this state has already returned all possible neighbors
 
+    /**
+     * Constructor. The state's id is in the from [time]:[mddnode 1] [mddnode 2] ... [mddnode n]
+     * Where mddNode i is the node that corresponds to mdd i
+     * @param time of state
+     * @param prev of state
+     * @param mddNodes of all the mdds involved
+     */
     public MergedState(int time, MergedState prev, MDDNode[] mddNodes) {
         this.time = time;
         this.prev = prev;
@@ -28,6 +38,10 @@ public class MergedState {
         this.id = time+":"+String.join(" ", strings);
     }
 
+    /**
+     * Return the next neighbor. If last neighbor is returned, marks gotAllPossibleNeighbors = true.
+     * @return next neighbor
+     */
     public MergedState getNextNeighbor() {
         // set all next
         MDDNode[] nextNodes = new MDDNode[mddNodes.length];
@@ -59,6 +73,9 @@ public class MergedState {
         return new MergedState(this.time+1, this, nextNodes);
     }
 
+    /**
+     * Compares the ids
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -67,6 +84,9 @@ public class MergedState {
         return id.equals(that.id);
     }
 
+    /**
+     * The hash code is the id string
+     */
     @Override
     public int hashCode() {
         return id.hashCode();

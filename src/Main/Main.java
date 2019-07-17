@@ -25,15 +25,16 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-//        launchGUI = true;
-//        MDD.skipCollisionChecking = true;
-//        MDD.print = true;
+        // --- Comment / uncomment to modify the run ---
+        launchGUI = true;
+//        MDD.ignoreCollisions = true; // to visualize a solution that ignores all collisions
+//        MDD.print = true; // print stuff during the low level search
         MDD.timeoutSeconds = 60;
 
-        String[] mapNames = {"den502d", "ost003d", "brc202d"};
-//        String[] mapNames = {"ost003d"};
-        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
-//        int[] agentCounts = {30};
+//        String[] mapNames = {"den502d", "ost003d", "brc202d"};
+        String[] mapNames = {"ost003d"};
+//        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
+        int[] agentCounts = {20};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
@@ -126,8 +127,6 @@ public class Main extends Application {
                     controller.initialize(graph.intGrid);
                     for (Agent agent : agents) controller.addAgent(agent.allocation);
                     controller.draw();
-//                    System.out.println("Press enter for next scenario");
-//                    System.in.read();
                 }
             }
         }
@@ -151,6 +150,9 @@ public class Main extends Application {
 
     }
 
+    /**
+     * Choose your own start and goal nodes
+     */
     private ArrayList<Agent> manualStartAndGoal(String mapPath) {
         ArrayList<Agent> agents = new ArrayList<>();
         agents.add(new Agent(1, 0, 3, 4, new BFSearcher(), mapPath));
@@ -158,6 +160,9 @@ public class Main extends Application {
         return agents;
     }
 
+    /**
+     * Random start and goal nodes
+     */
     private ArrayList<Agent> randomStartAndGoal(GridGraph graph, String mapPath, Integer agentCount) {
         ArrayList<Agent> agents = new ArrayList<>();
         HashSet<GridNode> startAndGoalNodes = new HashSet<>();
@@ -178,6 +183,9 @@ public class Main extends Application {
         return agents;
     }
 
+    /**
+     * Load start and goal nodes from the instances folder
+     */
     private ArrayList<Agent> instanceStartAndGoal(String mapName, String mapPath, int agentCount){
         ArrayList<Agent> agents = new ArrayList<>();
         try {

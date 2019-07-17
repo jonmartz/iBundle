@@ -5,12 +5,12 @@ import AuctionStrategies.IAuctionStrategy;
 import java.util.*;
 
 /**
- * This cass represents an auction
+ * Represents an auction,
  */
 public class Auction {
-    public int epsilon;//The additional cost added in each round by the Auctioneer (by default 1)
-    public IAuctionStrategy strategy;//The auction strategy
-    public boolean finished = false;//Is the auction finished
+    public int epsilon; //The additional cost added in each round by the Auctioneer (by default 1)
+    public IAuctionStrategy strategy; //The auction strategy for determining the winners of a round
+    public boolean finished = false; //Is the auction finished
 
     /**
      * The constructor
