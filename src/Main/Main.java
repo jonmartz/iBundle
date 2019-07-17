@@ -25,15 +25,15 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-        launchGUI = true;
-        MDD.skipCollisionChecking = true;
+//        launchGUI = true;
+//        MDD.skipCollisionChecking = true;
 //        MDD.print = true;
         MDD.timeoutSeconds = 60;
 
-//        String[] mapNames = {"den502d", "ost003d", "brc202d"};
-        String[] mapNames = {"ost003d"};
-//        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
-        int[] agentCounts = {30};
+        String[] mapNames = {"den502d", "ost003d", "brc202d"};
+//        String[] mapNames = {"ost003d"};
+        int[] agentCounts = {10, 15, 20, 25, 30, 35, 40};
+//        int[] agentCounts = {30};
         List<List<String>> rows = new ArrayList<>(); // to write results into csv
 
         for (Integer agentCount : agentCounts) {
